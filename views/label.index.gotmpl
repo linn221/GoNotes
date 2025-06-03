@@ -1,0 +1,78 @@
+{{ define "main" }}
+<div id="main">
+    <h3>Label Management</h3>
+    <a type="button" hx-get="/labels/new" hx-target="#create-modal">New</a>
+    {{ template "table_view" .ResList }}
+</div>
+{{ end }}
+
+{{ define "table_view" }}
+<table>
+    <thead>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Actions</th>
+    </thead>
+    <tbody>
+        {{ range . }}
+        <tr id="row-{{.Id}}">
+            <td>{{.Name}}</td>
+            <td>{{.Description}}</td>
+            <td>
+                <a hx-get="/labels/{{.Id}}" hx-target="#main" type="button">Details</a>
+                <a hx-get="/labels/{{.Id}}/edit" type="button" hx-target="#edit-modal">Edit</a>
+                <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}" hx-swap="delete">Delete</button>
+            </td>
+        </tr>
+        {{ else }}
+            <h4>Empty data. Create one by new button</h4>
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}
+
+{{ define "create_form" }}
+    <article>
+        <header>
+            New Label
+        </header>
+        {{ if .HasErrors }}
+            {{ template "form_with_errors" .Input }}
+        {{ else }}
+        <form hx-post="/labels" id="create-form" hx-target="#contents" hx-swap="">
+            <label>Name</label>
+            <input type="text" name="name" placeholder="Name" required>
+
+            <label>Description</label>
+            <textarea name="description" placeholder="Description"></textarea>
+
+            <footer>
+                <button type="submit">Create</button>
+            </footer>
+        </form>
+        {{ end }}
+    </article>
+{{ end }}
+
+{{ define "create_form_with_errors" }}
+<form target="/labels" method="POST">
+    <label>Name</label>
+    <input type="text" name="name" required
+    aria-invalid="{{.name.Invalid}}"
+    value="{{.name.Vlu}}">
+    {{ with .name.Err }}
+        <small>{{.}}</small>
+    {{ end }}
+
+    <label>Description</label>
+    <textarea name="description"
+    aria-invalid="{{.description.Invalid}}">{{.description.Vlu}}</textarea>
+    {{ with .description.Err }}
+        <small>{{.}}</small>
+    {{ end }}
+
+    <footer>
+        <button type="submit">Create</button>
+    </footer>
+</form>
+{{ end }}

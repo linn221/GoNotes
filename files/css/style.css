@@ -1,0 +1,13 @@
+  .error-dialog {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      background: #f44336;
+      color: white;
+      padding: 1rem 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      animation: fadeOut 5s forwards;
+      z-index: 1000;
+      font-family: sans-serif;
+  }

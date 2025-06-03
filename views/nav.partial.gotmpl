@@ -1,0 +1,15 @@
+{{ define "nav" }}
+<nav class="navbar">
+    <ul>
+        <li><a href="/tasks" hx-boost="true">Tasks</a></li>
+        <li><a href="/labels" hx-boost="true">Labels</a></li>
+    </ul>
+    <ul>
+        <li>
+            <form target="/users/logout">
+            <button type="submit"></button>
+            </form>
+        </li>
+    </ul>
+</nav>
+{{end }}

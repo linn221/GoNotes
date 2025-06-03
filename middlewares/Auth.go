@@ -8,7 +8,7 @@ import (
 func Auth(h http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if !myctx.IsAuth(r.Context()) {
-			http.Error(w, "Unauthenticated", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		h.ServeHTTP(w, r)

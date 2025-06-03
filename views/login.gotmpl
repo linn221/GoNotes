@@ -1,0 +1,56 @@
+{{ define "root" }}
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {{ with .Title }}
+        <title>{{.}}</title>
+    {{ else }}
+        <title>Go + HTMX App</title>
+    {{ end }}
+    <link rel="stylesheet" href="static/css/pico.min.css">
+    <script src="static/js/alpine.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <h3>Login</h3>
+        <form method="POST">
+
+        {{ if .HasErrors }}
+            {{ template "error_view" .Input }}
+        {{ else }}
+            <label>Username</label>
+            <input type="text" placeholder="name" name="username">
+
+            <label>Password</label>
+            <input type="password" name="password">
+
+            <button type="submit">Login</button>
+        {{end }}
+        </form>
+
+        <a href="/register" type="button">Register</a>
+    </div>
+</body>
+
+</html>
+{{ end }}
+
+{{ define "error_view" }}
+    <input type="text" placeholder="name" name="username" value="{{.username.Vlu}}"
+    aria-invalid="{{ .username.Invalid }}">
+    {{ with .username.Err }}
+        <small>{{ . }}</small>
+    {{ end }}
+
+    <input type="password" name="password" placeholder="password" value="{{.password.Vlu}}"
+        aria-invalid="{{ .password.Invalid }}">
+    {{ with .password.Err }}
+        <small>{{.}}</small>
+    {{ end }}
+
+    <button type="submit">Login</button>
+{{ end }}

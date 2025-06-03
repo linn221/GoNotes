@@ -19,6 +19,7 @@ import (
 const SearchLimit = 10
 
 var _UPLOAD_DIR string
+var _BASE_DIR string
 var _PORT string
 
 func ConnectDB() *gorm.DB {
@@ -29,6 +30,7 @@ func ConnectDB() *gorm.DB {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_BASE_DIR = dir
 	environmentPath := filepath.Join(dir, ".env")
 	err = godotenv.Load(environmentPath)
 	if err != nil {
@@ -51,6 +53,10 @@ func ConnectDB() *gorm.DB {
 
 func GetImageDirectory() string {
 	return _UPLOAD_DIR
+}
+
+func GetBaseDir() string {
+	return _BASE_DIR
 }
 
 func GetPortNo() string {

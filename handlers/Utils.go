@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"linn221/shop/formscanner"
 	"net/http"
 
 	"github.com/go-playground/validator"
@@ -99,4 +100,27 @@ func parseJson[T any](w http.ResponseWriter, r *http.Request) (*T, bool, error) 
 		return nil, false, err
 	}
 	return &v, true, nil
+}
+
+type ScanFormFunc func() (string, error)
+
+func newScanner[T any](r *http.Request, name string, ptr *T, scanFunc func(*http.Request, string) (T, bool, error), validateFuncs ...formscanner.ValidateFunc[T]) ScanFormFunc {
+	return func() (string, error) {
+		err := formscanner.Scan(r, name, ptr, scanFunc, validateFuncs...)
+		if err != nil {
+			return name, err
+		}
+		return "", nil
+	}
+}
+
+func runScanners(xs []func() (string, error)) map[string]error {
+	m := make(map[string]error)
+	for _, x := range xs {
+		if inputName, err := x(); err != nil {
+			m[inputName] = err
+		}
+	}
+
+	return m
 }

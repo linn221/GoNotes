@@ -1,0 +1,54 @@
+{{ define "root" }}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go + HTMX App</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/htmx.min.js" defer></script>
+    <script src="/static/js/helper.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="alert-container"></div>
+        {{ template "nav" }}
+
+        {{ template "main" . }}
+    </div>
+</body>
+<script>
+    document.body.addEventListener('htmx:responseError', function(event) {
+      // Only handle 500 errors
+      if (event.detail.xhr.status === 500) {
+        const message = event.detail.xhr.responseText;
+
+        const alert = document.createElement('div');
+        alert.setAttribute('role', 'alert');
+        alert.className = 'alert';
+        alert.style.padding = '1rem';
+        alert.style.border = '1px solid var(--pico-color-red)';
+        alert.style.backgroundColor = 'var(--pico-color-red-100)';
+        alert.style.color = 'var(--pico-color-red)';
+        alert.style.marginBottom = '1rem';
+
+        alert.textContent = message;
+
+        const container = document.getElementById('alert-container');
+        container.appendChild(alert);
+
+        // Remove alert after 5 seconds
+        setTimeout(() => {
+          alert.remove();
+        }, 5000);
+      }
+    });
+</script>
+
+</html>
+{{ end }}

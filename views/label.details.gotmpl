@@ -1,0 +1,19 @@
+{{ define "main" }}
+
+<article>
+<header>
+    Label Details
+</header>
+<h3>{{.Res.Name}}</h3>
+<p>{{.Res.Description}}</p>
+
+<footer>
+<a href="/labels/{{.Id}}/edit" type="button">Edit</button>
+
+<form target="/labels/{{.Id}}/delete" method="POST" id="form-{{.Id}}">
+</form>
+<button type="submit" form="form-{{.Id}}">Delete</button>
+</footer>
+</article>
+
+{{ end }}

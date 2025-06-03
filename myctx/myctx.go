@@ -33,6 +33,19 @@ func SetIds(ctx context.Context, userId int, shopId string) context.Context {
 	return ctx
 }
 
+func SetUserId(ctx context.Context, userId int) context.Context {
+	ctx = context.WithValue(ctx, userIdKey, userId)
+	return ctx
+}
+
+func GetUserId(ctx context.Context) (int, error) {
+	userId, ok := ctx.Value(userIdKey).(int)
+	if !ok || userId < 1 {
+		return 0, errors.New("userId is required")
+	}
+	return userId, nil
+}
+
 func IsAuth(ctx context.Context) bool {
 	isAuth, ok := ctx.Value(isAuth).(bool)
 	if !ok || !isAuth {
@@ -44,5 +57,4 @@ func IsAuth(ctx context.Context) bool {
 func SetAuth(ctx context.Context) context.Context {
 	ctx = context.WithValue(ctx, isAuth, true)
 	return ctx
-
 }

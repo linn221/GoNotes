@@ -1,12 +1,11 @@
 package middlewares
 
 import (
-	"errors"
 	"linn221/shop/myctx"
 	"linn221/shop/services"
 	"net/http"
 	"strconv"
-	"strings"
+	"time"
 )
 
 type SessionMiddleware struct {
@@ -15,15 +14,35 @@ type SessionMiddleware struct {
 
 // set userId in context if authenticated
 func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
+
+	respondInvalidSession := func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "invalid session", http.StatusUnauthorized)
+		// http.Error(w, err.Error(), http.StatusUnauthorized)
+		// remove cookies to avoid infinite loop
+		http.SetCookie(w, &http.Cookie{
+			Name:    "token",
+			Expires: time.Unix(0, 0), // Set to past
+			MaxAge:  -1,              // Also ensures deletion
+			Path:    "/",
+			Domain:  "",
+		})
+		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		return
+	}
+
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		token := r.Header.Get("Token")
-		if token == "" {
-			next.ServeHTTP(w, r)
-			// http.Error(w, "token is required", http.StatusUnauthorized)
+		cookies, err := r.Cookie("token")
+		if err != nil {
+			if err == http.ErrNoCookie {
+				next.ServeHTTP(w, r)
+				return
+			}
+
+			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-
+		token := cookies.Value
 		//2d check token length
 		val, ok, err := m.Cache.GetValue("Token:" + token)
 		if err != nil {
@@ -31,33 +50,19 @@ func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
 			return
 		}
 		if !ok {
-			http.Error(w, "invalid session", http.StatusUnauthorized)
+			respondInvalidSession(w, r)
 			return
 		}
-		userId, shopId, err := extractIdsFromCache(val)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+		userId, err := strconv.Atoi(val)
+		if err != nil || userId < 1 {
+			respondInvalidSession(w, r)
 			return
 		}
 
-		ctx := myctx.SetIds(r.Context(), userId, shopId)
+		ctx := myctx.SetUserId(r.Context(), userId)
 		ctx = myctx.SetAuth(ctx)
 		r = r.WithContext(ctx)
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func extractIdsFromCache(s string) (int, string, error) {
-	ss := strings.Split(s, ":")
-	if len(ss) != 2 {
-		return 0, "", errors.New("error splitting the ids")
-	}
-	userId, err := strconv.Atoi(ss[0])
-	if err != nil {
-		return 0, "", err
-	}
-	shopId := ss[1]
-
-	return userId, shopId, nil
 }
