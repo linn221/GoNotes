@@ -5,20 +5,8 @@ import (
 	"net/http"
 )
 
-type Label struct {
-	Id          int
-	Name        string
-	Description string
-}
-
-type LabelInput struct {
-	Name        FormError
-	Description FormError
-}
-
 func (r *Renderer) CreateFormLabel(w http.ResponseWriter, userId int) error {
-	page := newCreatePage("create label")
-	return r.labelTemplate.ExecuteTemplate(w, "create_form", page)
+	return r.labelTemplate.Execute(w, nil)
 }
 
 func (r *Renderer) CreateFormLabelWithErrors(w http.ResponseWriter, userId int, input *models.Label, errmap map[string]error) error {

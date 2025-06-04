@@ -2,7 +2,6 @@ package views
 
 import (
 	"html/template"
-	"net/http"
 	"path/filepath"
 )
 
@@ -22,9 +21,9 @@ type Renderer struct {
 
 	labelTemplate *template.Template
 
-	internalErrorTemplate  *template.Template //2d
-	notFoundTemplate       *template.Template //2d
-	invalidRequestTemplate *template.Template // 2d
+	// internalErrorTemplate  *template.Template //2d
+	// notFoundTemplate       *template.Template //2d
+	// invalidRequestTemplate *template.Template // 2d
 }
 
 func parseTemplateForPage(dir string) func(filenames ...string) *template.Template {
@@ -41,19 +40,12 @@ func parseTemplateForPage(dir string) func(filenames ...string) *template.Templa
 }
 
 func NewRenderer(baseDir string) *Renderer {
-	templateDir := filepath.Join(baseDir, "views")
+	templateDir := filepath.Join(baseDir, "views/templates")
 	parsePage := parseTemplateForPage(templateDir)
 	return &Renderer{
 		loginTemplate: template.Must(
 			template.New("root").ParseFiles(filepath.Join(templateDir, "login.gotmpl"))),
 		indexTemplate: parsePage("index.gotmpl"),
-
 		labelTemplate: parsePage("label.gotmpl"),
-	}
-}
-
-func (r *Renderer) CheckSystemError(w http.ResponseWriter, err error) {
-	if err != nil {
-		r.InternalServerError(w, err)
 	}
 }

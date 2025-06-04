@@ -114,7 +114,7 @@ func newScanner[T any](r *http.Request, name string, ptr *T, scanFunc func(*http
 	}
 }
 
-func runScanners(xs []func() (string, error)) map[string]error {
+func runScanners(xs []ScanFormFunc) map[string]error {
 	m := make(map[string]error)
 	for _, x := range xs {
 		if inputName, err := x(); err != nil {
@@ -123,4 +123,14 @@ func runScanners(xs []func() (string, error)) map[string]error {
 	}
 
 	return m
+}
+
+func createdResponse(w http.ResponseWriter) {
+	w.Header().Add("HX-Trigger", "content-created")
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func updatedResponse(w http.ResponseWriter) {
+	w.Header().Add("HX-Trigger", "content-updated")
+	w.WriteHeader(http.StatusNoContent)
 }

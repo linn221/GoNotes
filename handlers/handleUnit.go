@@ -1,135 +1,127 @@
 package handlers
 
-import (
-	"linn221/shop/models"
-	"linn221/shop/services"
-	"net/http"
+// type NewUnit struct {
+// 	Name        inputString     `json:"name" validate:"required,min=2,max=100"`
+// 	Symbol      inputString     `json:"symbol" validate:"required,min=1,max=10"`
+// 	Description *optionalString `json:"description" validate:"omitempty,max=500"`
+// }
 
-	"gorm.io/gorm"
-)
+// func (input *NewUnit) validate(db *gorm.DB, shopId string, id int) *ServiceError {
 
-type NewUnit struct {
-	Name        inputString     `json:"name" validate:"required,min=2,max=100"`
-	Symbol      inputString     `json:"symbol" validate:"required,min=1,max=10"`
-	Description *optionalString `json:"description" validate:"omitempty,max=500"`
-}
+// 	shopFilter := NewShopFilter(shopId)
+// 	if err := Validate(db,
+// 		NewExistsRule("units", id, "unit not found", shopFilter).When(id > 0),
+// 		NewUniqueRule("units", "name", input.Name, id, "duplicate name", shopFilter),
+// 		NewUniqueRule("units", "symbol", input.Symbol, id, "duplicate symbol", shopFilter),
+// 	); err != nil {
+// 		return err
+// 	}
+// 	return nil
+// }
 
-func (input *NewUnit) validate(db *gorm.DB, shopId string, id int) *ServiceError {
+// func HandleUnitCreate(db *gorm.DB,
+// 	cleanListingCache services.CleanListingCache,
+// ) http.HandlerFunc {
+// 	return CreateHandler(func(w http.ResponseWriter, r *http.Request, session Session, input *NewUnit) error {
 
-	shopFilter := NewShopFilter(shopId)
-	if err := Validate(db,
-		NewExistsRule("units", id, "unit not found", shopFilter).When(id > 0),
-		NewUniqueRule("units", "name", input.Name, id, "duplicate name", shopFilter),
-		NewUniqueRule("units", "symbol", input.Symbol, id, "duplicate symbol", shopFilter),
-	); err != nil {
-		return err
-	}
-	return nil
-}
+// 		if errs := input.validate(db.WithContext(r.Context()), session.ShopId, 0); errs != nil {
+// 			return errs.Respond(w)
+// 		}
+// 		unit := models.Unit{
+// 			Name:        input.Name.String(),
+// 			Symbol:      input.Symbol.String(),
+// 			Description: input.Description.StringPtr(),
+// 		}
+// 		unit.ShopId = session.ShopId
+// 		err := db.WithContext(r.Context()).Transaction(func(tx *gorm.DB) error {
+// 			if err := tx.Create(&unit).Error; err != nil {
+// 				return err
+// 			}
 
-func HandleUnitCreate(db *gorm.DB,
-	cleanListingCache services.CleanListingCache,
-) http.HandlerFunc {
-	return CreateHandler(func(w http.ResponseWriter, r *http.Request, session Session, input *NewUnit) error {
+// 			if err := cleanListingCache(session.ShopId); err != nil {
+// 				return err
+// 			}
+// 			return nil
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
 
-		if errs := input.validate(db.WithContext(r.Context()), session.ShopId, 0); errs != nil {
-			return errs.Respond(w)
-		}
-		unit := models.Unit{
-			Name:        input.Name.String(),
-			Symbol:      input.Symbol.String(),
-			Description: input.Description.StringPtr(),
-		}
-		unit.ShopId = session.ShopId
-		err := db.WithContext(r.Context()).Transaction(func(tx *gorm.DB) error {
-			if err := tx.Create(&unit).Error; err != nil {
-				return err
-			}
+// 		w.WriteHeader(http.StatusCreated)
+// 		return nil
+// 	})
+// }
 
-			if err := cleanListingCache(session.ShopId); err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
+// func HandleUnitUpdate(db *gorm.DB,
+// 	cleanCache func(db *gorm.DB, shopId string, id int) error,
+// ) http.HandlerFunc {
 
-		w.WriteHeader(http.StatusCreated)
-		return nil
-	})
-}
+// 	return UpdateHandler(func(w http.ResponseWriter, r *http.Request, session Session, input *NewUnit) error {
 
-func HandleUnitUpdate(db *gorm.DB,
-	cleanCache func(db *gorm.DB, shopId string, id int) error,
-) http.HandlerFunc {
+// 		ctx := r.Context()
+// 		if errs := input.validate(db.WithContext(ctx), session.ShopId, session.ResId); errs != nil {
+// 			return errs.Respond(w)
+// 		}
+// 		updates := map[string]any{
+// 			"Name":   input.Name.String(),
+// 			"Symbol": input.Symbol.String(),
+// 		}
+// 		if input.Description.IsPresent() {
+// 			updates["Description"] = input.Description.String()
+// 		}
+// 		unit, errs := first[models.Unit](db.WithContext(ctx), session.ShopId, session.ResId)
+// 		if errs != nil {
+// 			return errs.Respond(w)
+// 		}
 
-	return UpdateHandler(func(w http.ResponseWriter, r *http.Request, session Session, input *NewUnit) error {
+// 		err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+// 			if err := tx.Model(&unit).Updates(updates).Error; err != nil {
+// 				return err
+// 			}
 
-		ctx := r.Context()
-		if errs := input.validate(db.WithContext(ctx), session.ShopId, session.ResId); errs != nil {
-			return errs.Respond(w)
-		}
-		updates := map[string]any{
-			"Name":   input.Name.String(),
-			"Symbol": input.Symbol.String(),
-		}
-		if input.Description.IsPresent() {
-			updates["Description"] = input.Description.String()
-		}
-		unit, errs := first[models.Unit](db.WithContext(ctx), session.ShopId, session.ResId)
-		if errs != nil {
-			return errs.Respond(w)
-		}
+// 			if err := cleanCache(db.WithContext(ctx), session.ShopId, session.ResId); err != nil {
+// 				return err
+// 			}
+// 			return nil
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
 
-		err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-			if err := tx.Model(&unit).Updates(updates).Error; err != nil {
-				return err
-			}
+// 		respondNoContent(w)
+// 		return nil
+// 	})
+// }
 
-			if err := cleanCache(db.WithContext(ctx), session.ShopId, session.ResId); err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
+// func HandleUnitDelete(db *gorm.DB,
+// 	cleanCache func(db *gorm.DB, shopId string, id int) error,
+// ) http.HandlerFunc {
+// 	return DeleteHandler(func(w http.ResponseWriter, r *http.Request, session Session) error {
+// 		ctx := r.Context()
+// 		unit, errs := first[models.Unit](db.WithContext(ctx), session.ShopId, session.ResId)
+// 		if errs != nil {
+// 			return errs.Respond(w)
+// 		}
 
-		respondNoContent(w)
-		return nil
-	})
-}
+// 		if errs := Validate(db.WithContext(ctx),
+// 			NewNoResultRule("units", "unit has been used in items", NewFilter("unit_id = ?", session.ResId)),
+// 		); errs != nil {
+// 			return errs.Respond(w)
+// 		}
+// 		err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+// 			if err := tx.Delete(&unit).Error; err != nil {
+// 				return err
+// 			}
+// 			if err := cleanCache(db.WithContext(ctx), session.ShopId, session.ResId); err != nil {
+// 				return err
+// 			}
+// 			return nil
+// 		})
+// 		if err != nil {
+// 			return err
+// 		}
 
-func HandleUnitDelete(db *gorm.DB,
-	cleanCache func(db *gorm.DB, shopId string, id int) error,
-) http.HandlerFunc {
-	return DeleteHandler(func(w http.ResponseWriter, r *http.Request, session Session) error {
-		ctx := r.Context()
-		unit, errs := first[models.Unit](db.WithContext(ctx), session.ShopId, session.ResId)
-		if errs != nil {
-			return errs.Respond(w)
-		}
-
-		if errs := Validate(db.WithContext(ctx),
-			NewNoResultRule("units", "unit has been used in items", NewFilter("unit_id = ?", session.ResId)),
-		); errs != nil {
-			return errs.Respond(w)
-		}
-		err := db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
-			if err := tx.Delete(&unit).Error; err != nil {
-				return err
-			}
-			if err := cleanCache(db.WithContext(ctx), session.ShopId, session.ResId); err != nil {
-				return err
-			}
-			return nil
-		})
-		if err != nil {
-			return err
-		}
-
-		respondNoContent(w)
-		return nil
-	})
-}
+// 		respondNoContent(w)
+// 		return nil
+// 	})
+// }

@@ -8,13 +8,12 @@ import (
 
 type DefaultSession struct {
 	UserId int
-	ShopId string
 }
 
 func DefaultHandler(handle func(http.ResponseWriter, *http.Request, *DefaultSession) error) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
-		userId, shopId, err := myctx.GetIdsFromContext(ctx)
+		userId, err := myctx.GetUserId(ctx)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
@@ -22,7 +21,6 @@ func DefaultHandler(handle func(http.ResponseWriter, *http.Request, *DefaultSess
 
 		session := DefaultSession{
 			UserId: userId,
-			ShopId: shopId,
 		}
 
 		err = handle(w, r, &session)

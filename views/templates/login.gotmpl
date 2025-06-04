@@ -5,11 +5,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{ with .Title }}
-        <title>{{.}}</title>
-    {{ else }}
+
         <title>Go + HTMX App</title>
-    {{ end }}
     <link rel="stylesheet" href="static/css/pico.min.css">
     <script src="static/js/alpine.js" defer></script>
 </head>
@@ -19,9 +16,7 @@
         <h3>Login</h3>
         <form method="POST">
 
-        {{ if .HasErrors }}
-            {{ template "error_view" .Input }}
-        {{ else }}
+
             <label>Username</label>
             <input type="text" placeholder="name" name="username">
 
@@ -29,7 +24,6 @@
             <input type="password" name="password">
 
             <button type="submit">Login</button>
-        {{end }}
         </form>
 
         <a href="/register" type="button">Register</a>

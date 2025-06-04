@@ -18,7 +18,7 @@ import (
 
 func parseLoginForm(r *http.Request) (*models.User, map[string]error) {
 	var input models.User
-	scans := [...]func() (string, error){
+	scans := [...]ScanFormFunc{
 		newScanner(r, "username", &input.Username, formscanner.StringRequired, formscanner.MinMax(4, 20)),
 		newScanner(r, "password", &input.Password, formscanner.StringRequired, formscanner.MinMax(3, 20)),
 	}
@@ -33,36 +33,43 @@ func HandleLogin(vr *views.Renderer,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
-			vr.CheckSystemError(w, vr.Login(w))
+			finalErrHandle(w,
+				vr.Login(w),
+			)
 			return
 		} else if r.Method == http.MethodPost {
 
 			input, errMap := parseLoginForm(r)
 			if len(errMap) > 0 {
-				vr.CheckSystemError(w, vr.LoginFormWithErrors(w, input, errMap))
+				finalErrHandle(w,
+					vr.LoginFormWithErrors(w, input, errMap),
+				)
 				return
 			}
 
 			var user models.User
 			if err := db.Where("username = ?", input.Username).First(&user).Error; err != nil {
-				vr.CheckSystemError(w, vr.LoginFormWithErrors(w, input, map[string]error{
-					"username": errors.New("invalid username/password"),
-					"password": errors.New("invalid username/password")}))
+				finalErrHandle(w,
+					vr.LoginFormWithErrors(w, input, map[string]error{
+						"username": errors.New("invalid username/password"),
+						"password": errors.New("invalid username/password")}),
+				)
 				return
 			}
 
 			if err := utils.ComparePassword(user.Password, input.Password); err != nil {
-				err = vr.LoginFormWithErrors(w, input, map[string]error{
-					"username": errors.New("invalid username/password"),
-					"password": errors.New("invalid username/password"),
-				})
-				vr.CheckSystemError(w, err)
+				finalErrHandle(w,
+					vr.LoginFormWithErrors(w, input, map[string]error{
+						"username": errors.New("invalid username/password"),
+						"password": errors.New("invalid username/password"),
+					}),
+				)
 				return
 			}
 
 			token, err := newSessionToken(cache, user.Id)
 			if err != nil {
-				vr.InternalServerError(w, err)
+				finalErrHandle(w, err)
 				return
 			}
 
@@ -79,7 +86,7 @@ func HandleLogin(vr *views.Renderer,
 			// utils.HxRedirect(w, "/users/labels")
 			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
 		} else {
-			vr.InvalidRequest(w, errors.New("invalid http method"))
+			finalErrHandle(w, errors.New("invalid http method"))
 		}
 	}
 }
@@ -101,13 +108,13 @@ func HandleLogout(cache services.CacheService, vr *views.Renderer) http.HandlerF
 				http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 				return
 			}
-			vr.InternalServerError(w, err)
+			finalErrHandle(w, err)
 			return
 		}
 		token := cookies.Value
 		//2d write helper for removing token from redis
 		if err := cache.RemoveKey(fmt.Sprintf("Token:%s", token)); err != nil {
-			vr.InternalServerError(w, err)
+			finalErrHandle(w, err)
 			return
 		}
 		removeTokenCookies(w)
