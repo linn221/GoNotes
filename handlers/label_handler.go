@@ -11,7 +11,7 @@ import (
 
 func ShowLabelCreate(vr *views.Renderer) http.HandlerFunc {
 	return DefaultHandler(func(w http.ResponseWriter, r *http.Request, ds *DefaultSession) error {
-		return vr.CreateFormLabel(w, ds.UserId)
+		return vr.LabelCreateForm(w, ds.UserId)
 	})
 }
 
@@ -21,7 +21,7 @@ func ShowLabelEdit(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 		if err := db.First(&label, s.ResId).Error; err != nil {
 			return err
 		}
-		return vr.EditFormLabel(w, s.UserId, s.ResId, &label)
+		return vr.LabelEditForm(w, s.UserId, s.ResId, &label)
 	})
 }
 
@@ -31,16 +31,16 @@ func ShowLabelIndex(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 		if err := db.Find(&results).Error; err != nil {
 			return err
 		}
-		return vr.IndexPageLabel(w, results, r.Header.Get("HX-Request") == "")
+		return vr.LabelIndexPage(w, results, r.Header.Get("HX-Request") == "")
 	})
 }
 
 func HandleLabelUpdate(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 	return ResourceHandler(func(w http.ResponseWriter, r *http.Request, s *Session) error {
-		input, errmap := ParseLabel(w, r)
+		input, errmap := parseLabel(r)
 		if len(errmap) > 0 {
 			w.WriteHeader(http.StatusNoContent)
-			return vr.EditFormLabelWithErrors(w, s.UserId, s.ResId, input, errmap)
+			return vr.LabelUpdateError(w, s.UserId, s.ResId, input, errmap)
 		}
 
 		// if m := input.Validate(container.db, container.resId, container.userId); len(m) > 0 {
@@ -57,7 +57,7 @@ func HandleLabelUpdate(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 		if err := db.Model(&label).Updates(updates).Error; err != nil {
 			return err
 		}
-		return vr.SuccessLabelEdit(w, &label)
+		return vr.LabelUpdateOk(w, &label)
 	})
 }
 
@@ -77,27 +77,37 @@ func HandleLabelDelete(db *gorm.DB) http.HandlerFunc {
 
 func HandleLabelCreate(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 
-	return DefaultHandler(func(w http.ResponseWriter, r *http.Request, ds *DefaultSession) error {
-		input, errmap := ParseLabel(w, r)
-		if len(errmap) > 0 {
-			w.WriteHeader(http.StatusNoContent)
-			return vr.CreateFormLabelWithErrors(w, ds.UserId, input, errmap)
-		}
-		if err := db.Create(&input).Error; err != nil {
-			return err
-		}
+	return CreateHandler(CreateResource[models.Label]{
+		parseInput: parseLabel,
+		handleParseError: func(w http.ResponseWriter, r *http.Request, ds *DefaultSession, l *models.Label, fe formErrors) error {
+			return vr.LabelCreateError(w, ds.UserId, l, fe)
+		},
+		handle: func(w http.ResponseWriter, r *http.Request, ds *DefaultSession, l *models.Label) error {
 
-		return vr.SuccessLabelCreate(w, input)
+			return nil
+		},
 	})
+	// return DefaultHandler(func(w http.ResponseWriter, r *http.Request, ds *DefaultSession) error {
+	// 	input, errmap := parseLabel(r)
+	// 	if len(errmap) > 0 {
+	// 		w.WriteHeader(http.StatusNoContent)
+	// 		return vr.LabelCreateError(w, ds.UserId, input, errmap)
+	// 	}
+	// 	if err := db.Create(&input).Error; err != nil {
+	// 		return err
+	// 	}
+
+	// 	return vr.LabelCreateOk(w, input)
+	// })
 }
 
-func ParseLabel(w http.ResponseWriter, r *http.Request) (*models.Label, map[string]error) {
+func parseLabel(r *http.Request) (*models.Label, formErrors) {
 
 	var input models.Label
 
-	scans := [...]ScanFormFunc{
-		newScanner(r, "name", &input.Name, formscanner.StringRequired, formscanner.MinMax(4, 20)),
-		newScanner(r, "description", &input.Description, formscanner.String, formscanner.MinMax(4, 20)),
+	scans := [...]ScannerFunc{
+		newScannerFunc(r, "name", &input.Name, formscanner.StringRequired, formscanner.MinMax(4, 20)),
+		newScannerFunc(r, "description", &input.Description, formscanner.String, formscanner.MinMax(4, 20)),
 	}
 
 	m := runScanners(scans[:])

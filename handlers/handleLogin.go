@@ -18,9 +18,9 @@ import (
 
 func parseLoginForm(r *http.Request) (*models.User, map[string]error) {
 	var input models.User
-	scans := [...]ScanFormFunc{
-		newScanner(r, "username", &input.Username, formscanner.StringRequired, formscanner.MinMax(4, 20)),
-		newScanner(r, "password", &input.Password, formscanner.StringRequired, formscanner.MinMax(3, 20)),
+	scans := [...]ScannerFunc{
+		newScannerFunc(r, "username", &input.Username, formscanner.StringRequired, formscanner.MinMax(4, 20)),
+		newScannerFunc(r, "password", &input.Password, formscanner.StringRequired, formscanner.MinMax(3, 20)),
 	}
 
 	m := runScanners(scans[:])
@@ -34,7 +34,7 @@ func HandleLogin(vr *views.Renderer,
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			finalErrHandle(w,
-				vr.Login(w),
+				vr.LoginPage(w),
 			)
 			return
 		} else if r.Method == http.MethodPost {

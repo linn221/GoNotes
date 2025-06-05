@@ -5,11 +5,11 @@ import (
 	"net/http"
 )
 
-func (r *Renderer) CreateFormLabel(w http.ResponseWriter, userId int) error {
+func (r *Renderer) LabelCreateForm(w http.ResponseWriter, userId int) error {
 	return r.labelTemplate.Execute(w, nil)
 }
 
-func (r *Renderer) CreateFormLabelWithErrors(w http.ResponseWriter, userId int, input *models.Label, errmap map[string]error) error {
+func (r *Renderer) LabelCreateError(w http.ResponseWriter, userId int, input *models.Label, errmap map[string]error) error {
 
 	m := map[string]FormError{
 		"name":        NewFormError(input.Name, errmap["name"]),
@@ -18,25 +18,25 @@ func (r *Renderer) CreateFormLabelWithErrors(w http.ResponseWriter, userId int, 
 	return r.labelTemplate.ExecuteTemplate(w, "create_form2", m)
 }
 
-func (r *Renderer) SuccessLabelCreate(w http.ResponseWriter, label *models.Label) error {
+func (r *Renderer) LabelCreateOk(w http.ResponseWriter, label *models.Label) error {
 	return r.labelTemplate.ExecuteTemplate(w, "create_success", map[string]any{
 		"Res": label,
 	})
 }
 
-func (r *Renderer) SuccessLabelEdit(w http.ResponseWriter, label *models.Label) error {
+func (r *Renderer) LabelUpdateOk(w http.ResponseWriter, label *models.Label) error {
 	return r.labelTemplate.ExecuteTemplate(w, "edit_success", map[string]any{
 		"Res": label,
 	})
 }
 
-func (r *Renderer) EditFormLabel(w http.ResponseWriter, userId int, resId int, input *models.Label) error {
+func (r *Renderer) LabelEditForm(w http.ResponseWriter, userId int, resId int, input *models.Label) error {
 	return r.labelTemplate.ExecuteTemplate(w, "edit_form", map[string]any{
 		"Res": input,
 		"Id":  resId,
 	})
 }
-func (r *Renderer) EditFormLabelWithErrors(w http.ResponseWriter, userId int, resId int, input *models.Label, errMap map[string]error) error {
+func (r *Renderer) LabelUpdateError(w http.ResponseWriter, userId int, resId int, input *models.Label, errMap map[string]error) error {
 
 	m := map[string]any{
 		"Id":          resId,
@@ -46,7 +46,7 @@ func (r *Renderer) EditFormLabelWithErrors(w http.ResponseWriter, userId int, re
 	return r.labelTemplate.ExecuteTemplate(w, "edit_form2", m)
 }
 
-func (r *Renderer) IndexPageLabel(w http.ResponseWriter, labels []models.Label, loadFullPage bool) error {
+func (r *Renderer) LabelIndexPage(w http.ResponseWriter, labels []models.Label, loadFullPage bool) error {
 	templateName := "main"
 	if loadFullPage {
 		templateName = "root"

@@ -18,6 +18,6 @@ func (r *Renderer) Index(w http.ResponseWriter) error {
 	return r.indexTemplate.Execute(w, nil)
 }
 
-func (r *Renderer) Login(w http.ResponseWriter) error {
+func (r *Renderer) LoginPage(w http.ResponseWriter) error {
 	return r.loginTemplate.Execute(w, nil)
 }

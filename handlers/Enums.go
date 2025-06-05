@@ -5,6 +5,8 @@ import (
 	"strings"
 )
 
+type formErrors map[string]error
+
 // auto trimming space
 type inputString string
 
