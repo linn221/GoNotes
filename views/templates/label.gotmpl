@@ -44,6 +44,7 @@
             <input type="text" name="name">
 
             <button type="submit">Create</button>
+            <button type="button" onclick="$('#create-dialog').close()">Close</button>
         </form>
     </dialog>
 {{end}}
@@ -56,7 +57,6 @@
 
 {{/* @[name] */}}
 {{ define "create_form2" }}
-    <dialog open id="create-dialog" hx-swap-oob="true">
     <form hx-post="/labels"
     id="create-form"
     hx-target="#contents"
@@ -70,8 +70,8 @@
         {{end}}
 
         <button type="submit">Create</button>
+        <button type="button" onclick="$('#create-dialog').close()">Close</button>
     </form>
-    </dialog>
 {{end}}
 
 {{/* @[Id .Res] */}}
@@ -85,7 +85,8 @@
 
     <label>Name</label>
     <input type="text" name="name" value="{{.Res.Name}}">
-    <button>Update</button>
+    <button type="submit">Update</button>
+    <button type="button" onclick="$('#edit-dialog').close()">Close</button>
 
     </form>
     </dialog>
@@ -99,20 +100,19 @@
 
 {{/* @[Id name] */}}
 {{define "edit_form2"}}
-    <dialog open id="edit-dialog" hx-swap-oob="true">
-        <form hx-put="/labels/{{.Id}}"
-        id="edit-form"
-        hx-target="#row-{{.Id}}"
-        hx-swap="outerHTML"
-        >
+    <form hx-put="/labels/{{.Id}}"
+    id="edit-form"
+    hx-target="#row-{{.Id}}"
+    hx-swap="outerHTML"
+    >
 
-        <label>Name</label>
-        <input type="text" name="name" value="{{.name.Vlu}}" aria-invalid="{{.name.Invalid}}">
-        {{with .name.Err}}
-            <small>{{.}}</small>
-        {{end}}
-        <button>Update</button>
+    <label>Name</label>
+    <input type="text" name="name" value="{{.name.Vlu}}" aria-invalid="{{.name.Invalid}}">
+    {{with .name.Err}}
+        <small>{{.}}</small>
+    {{end}}
+    <button type="submit">Update</button>
+    <button type="button" onclick="$('#edit-dialog').close()">Close</button>
 
-        </form>
-    </dialog>
+    </form>
 {{end}}

@@ -46,12 +46,8 @@ func (r *Renderer) LabelUpdateError(w http.ResponseWriter, userId int, resId int
 	return r.labelTemplate.ExecuteTemplate(w, "edit_form2", m)
 }
 
-func (r *Renderer) LabelIndexPage(w http.ResponseWriter, labels []models.Label, loadFullPage bool) error {
-	templateName := "main"
-	if loadFullPage {
-		templateName = "root"
-	}
-	return r.labelTemplate.ExecuteTemplate(w, templateName, map[string]any{
+func (r *Renderer) LabelIndexPage(w http.ResponseWriter, labels []models.Label) error {
+	return r.labelTemplate.ExecuteTemplate(w, "root", map[string]any{
 		"ResList": labels,
 	})
 }

@@ -37,7 +37,8 @@ func CreateHandler[T any](res CreateResource[T]) http.HandlerFunc {
 
 		input, ferrs := res.parseInput(r)
 		if len(ferrs) > 0 {
-			w.WriteHeader(http.StatusNoContent)
+			w.Header().Add("HX-Retarget", "#create-form")
+			w.Header().Add("HX-Reswap", "outerHTML")
 			finalErrHandle(w,
 				res.handleParseError(w, r, &session, input, ferrs),
 			)

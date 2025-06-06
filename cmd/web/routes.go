@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"linn221/shop/handlers"
 	"linn221/shop/middlewares"
 	"log"
@@ -42,4 +43,5 @@ func (app *App) Serve() {
 	}
 
 	log.Fatal(srv.ListenAndServe())
+	fmt.Println("server started")
 }

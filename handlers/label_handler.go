@@ -31,7 +31,7 @@ func ShowLabelIndex(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 		if err := db.Find(&results).Error; err != nil {
 			return err
 		}
-		return vr.LabelIndexPage(w, results, r.Header.Get("HX-Request") == "")
+		return vr.LabelIndexPage(w, results)
 	})
 }
 

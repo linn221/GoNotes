@@ -39,7 +39,8 @@ func UpdateHandler[T any](res UpdateResource[T]) http.HandlerFunc {
 
 		input, ferrs := res.parseInput(r)
 		if len(ferrs) > 0 {
-			w.WriteHeader(http.StatusBadRequest)
+			w.Header().Add("HX-Retarget", "#edit-form")
+			w.Header().Add("HX-Reswap", "outerHTML")
 			finalErrHandle(w,
 				res.handleParseError(w, r, &session, input, ferrs),
 			)
