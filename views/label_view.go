@@ -6,7 +6,7 @@ import (
 )
 
 func (r *Renderer) LabelCreateForm(w http.ResponseWriter, userId int) error {
-	return r.labelTemplate.Execute(w, nil)
+	return r.labelTemplate.ExecuteTemplate(w, "create_form", nil)
 }
 
 func (r *Renderer) LabelCreateError(w http.ResponseWriter, userId int, input *models.Label, errmap map[string]error) error {

@@ -5,6 +5,7 @@ import (
 	"linn221/shop/config"
 	"linn221/shop/models"
 	"linn221/shop/views"
+	"path/filepath"
 )
 
 func main() {
@@ -15,6 +16,7 @@ func main() {
 	port := config.GetPortNo()
 	readServices := models.NewReaders(db, redisCache)
 	renderer := views.NewRenderer(config.GetBaseDir())
+	assetDir := filepath.Join(config.GetBaseDir(), "../../files")
 
 	// // rate limiting crud endpoints by userId
 	// resourceRateLimit := middlewares.NewRateLimiter(redisCache.GetClient(), time.Minute*5, 2000, "r", func(r *http.Request) (string, error) {
@@ -38,6 +40,7 @@ func main() {
 		Readers:        readServices,
 		Renderer:       renderer,
 		Port:           port,
+		AssetDirectory: assetDir,
 		// ResourceRateLimit: resourceRateLimit,
 		// GeneralRateLimit:  generalRateLimit,
 	}

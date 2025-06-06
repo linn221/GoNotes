@@ -37,6 +37,7 @@ func CreateHandler[T any](res CreateResource[T]) http.HandlerFunc {
 
 		input, ferrs := res.parseInput(r)
 		if len(ferrs) > 0 {
+			w.WriteHeader(http.StatusNoContent)
 			finalErrHandle(w,
 				res.handleParseError(w, r, &session, input, ferrs),
 			)

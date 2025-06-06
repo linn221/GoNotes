@@ -36,28 +36,26 @@ func ShowLabelIndex(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 }
 
 func HandleLabelUpdate(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
-	return ResourceHandler(func(w http.ResponseWriter, r *http.Request, s *Session) error {
-		input, errmap := parseLabel(r)
-		if len(errmap) > 0 {
-			w.WriteHeader(http.StatusNoContent)
-			return vr.LabelUpdateError(w, s.UserId, s.ResId, input, errmap)
-		}
-
-		// if m := input.Validate(container.db, container.resId, container.userId); len(m) > 0 {
-		// 	return &input, m
-		// }
-		var label models.Label
-		if err := db.First(&label, s.ResId).Error; err != nil {
-			return err
-		}
-		updates := map[string]any{
-			"Name":        input.Name,
-			"Description": input.Description,
-		}
-		if err := db.Model(&label).Updates(updates).Error; err != nil {
-			return err
-		}
-		return vr.LabelUpdateOk(w, &label)
+	return UpdateHandler(UpdateResource[models.Label]{
+		parseInput: parseLabel,
+		handleParseError: func(w http.ResponseWriter, r *http.Request, s *Session, l *models.Label, fe formErrors) error {
+			return vr.LabelUpdateError(w, s.UserId, s.ResId, l, fe)
+		},
+		handle: func(w http.ResponseWriter, r *http.Request, s *Session, l *models.Label) error {
+			var label models.Label
+			ctx := r.Context()
+			if err := db.WithContext(ctx).First(&label, s.ResId).Error; err != nil {
+				return err
+			}
+			updates := map[string]any{
+				"Name":        l.Name,
+				"Description": l.Description,
+			}
+			if err := db.WithContext(ctx).Model(&label).Updates(updates).Error; err != nil {
+				return err
+			}
+			return vr.LabelUpdateOk(w, &label)
+		},
 	})
 }
 
@@ -84,21 +82,12 @@ func HandleLabelCreate(vr *views.Renderer, db *gorm.DB) http.HandlerFunc {
 		},
 		handle: func(w http.ResponseWriter, r *http.Request, ds *DefaultSession, l *models.Label) error {
 
-			return nil
+			if err := db.WithContext(r.Context()).Create(&l).Error; err != nil {
+				return err
+			}
+			return vr.LabelCreateOk(w, l)
 		},
 	})
-	// return DefaultHandler(func(w http.ResponseWriter, r *http.Request, ds *DefaultSession) error {
-	// 	input, errmap := parseLabel(r)
-	// 	if len(errmap) > 0 {
-	// 		w.WriteHeader(http.StatusNoContent)
-	// 		return vr.LabelCreateError(w, ds.UserId, input, errmap)
-	// 	}
-	// 	if err := db.Create(&input).Error; err != nil {
-	// 		return err
-	// 	}
-
-	// 	return vr.LabelCreateOk(w, input)
-	// })
 }
 
 func parseLabel(r *http.Request) (*models.Label, formErrors) {

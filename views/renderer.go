@@ -40,7 +40,7 @@ func parseTemplateForPage(dir string) func(filenames ...string) *template.Templa
 }
 
 func NewRenderer(baseDir string) *Renderer {
-	templateDir := filepath.Join(baseDir, "views/templates")
+	templateDir := filepath.Join(baseDir, "../../views/templates")
 	parsePage := parseTemplateForPage(templateDir)
 	return &Renderer{
 		loginTemplate: template.Must(

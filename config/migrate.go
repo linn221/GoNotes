@@ -8,7 +8,8 @@ import (
 
 func migrate(db *gorm.DB) {
 
-	err := db.AutoMigrate(&models.Shop{}, &models.User{}, &models.Image{}, &models.Category{}, &models.Unit{}, &models.Item{})
+	err := db.AutoMigrate(&models.Shop{}, &models.User{}, &models.Image{}, &models.Category{}, &models.Unit{}, &models.Item{},
+		&models.Label{})
 	if err != nil {
 		panic("Error migrating: " + err.Error())
 	}

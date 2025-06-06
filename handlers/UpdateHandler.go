@@ -1,5 +1,90 @@
 package handlers
 
+import (
+	"linn221/shop/myctx"
+	"net/http"
+	"strconv"
+)
+
+type UpdateResource[T any] struct {
+	parseInput       func(*http.Request) (*T, formErrors)
+	handleParseError func(http.ResponseWriter, *http.Request, *Session, *T, formErrors) error
+	handle           func(http.ResponseWriter, *http.Request, *Session, *T) error
+}
+
+func UpdateHandler[T any](res UpdateResource[T]) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userId, err := myctx.GetUserId(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		resIdStr := r.PathValue("id")
+		if resIdStr == "" {
+			http.Error(w, "resource id is required", http.StatusBadRequest)
+			return
+		}
+		resId, err := strconv.Atoi(resIdStr)
+		if err != nil {
+			http.Error(w, "resource id is required", http.StatusBadRequest)
+			return
+
+		}
+		session := Session{
+			UserId: userId,
+			ResId:  resId,
+		}
+
+		input, ferrs := res.parseInput(r)
+		if len(ferrs) > 0 {
+			w.WriteHeader(http.StatusBadRequest)
+			finalErrHandle(w,
+				res.handleParseError(w, r, &session, input, ferrs),
+			)
+			return
+		}
+
+		err = res.handle(w, r, &session, input)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+// type UpdateFunc[T any] func(w http.ResponseWriter, r *http.Request, session Session, input *T) error
+
+// func UpdateHandler[T any](handle UpdateFunc[T]) http.HandlerFunc {
+// 	return func(w http.ResponseWriter, r *http.Request) {
+
+// 		ctx := r.Context()
+// 		userId, shopId, err := myctx.GetIdsFromContext(ctx)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+
+// 		input, ok, err := parseJson[T](w, r)
+// 		if !ok {
+// 			if err != nil {
+// 				http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			}
+// 			return
+// 		}
+
+// 		UpdateSession := Session{
+// 			UserId: userId,
+// 		}
+// 		err = handle(w, r, UpdateSession, input)
+// 		if err != nil {
+// 			http.Error(w, err.Error(), http.StatusInternalServerError)
+// 			return
+// 		}
+// 	}
+// }
+
 // type UpdateFunc[T any] func(w http.ResponseWriter, r *http.Request, session Session, input *T) error
 
 // func UpdateHandler[T any](handle UpdateFunc[T]) http.HandlerFunc {

@@ -84,7 +84,7 @@ func HandleLogin(vr *views.Renderer,
 			// w.Header().Set("HX-Redirect", "/")
 			// w.WriteHeader(http.StatusOK)
 			// utils.HxRedirect(w, "/users/labels")
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/labels", http.StatusTemporaryRedirect)
 		} else {
 			finalErrHandle(w, errors.New("invalid http method"))
 		}

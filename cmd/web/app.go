@@ -12,6 +12,7 @@ type App struct {
 	DB             *gorm.DB
 	Cache          *config.RedisCache
 	ImageDirectory string
+	AssetDirectory string
 	Readers        *models.ReadServices
 	Port           string
 	Renderer       *views.Renderer
