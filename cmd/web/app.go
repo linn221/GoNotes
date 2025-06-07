@@ -15,7 +15,7 @@ type App struct {
 	AssetDirectory string
 	Readers        *models.ReadServices
 	Port           string
-	Renderer       *views.Renderer
+	Templates      *views.Templates
 	// GeneralRateLimit  func(http.Handler) http.Handler
 	// ResourceRateLimit func(http.Handler) http.Handler
 }

@@ -15,7 +15,7 @@ func main() {
 	dir := config.GetImageDirectory()
 	port := config.GetPortNo()
 	readServices := models.NewReaders(db, redisCache)
-	renderer := views.NewRenderer(config.GetBaseDir())
+	templates := views.NewEngine(config.GetBaseDir())
 	assetDir := filepath.Join(config.GetBaseDir(), "../../files")
 
 	// // rate limiting crud endpoints by userId
@@ -38,7 +38,7 @@ func main() {
 		Cache:          redisCache,
 		ImageDirectory: dir,
 		Readers:        readServices,
-		Renderer:       renderer,
+		Templates:      templates,
 		Port:           port,
 		AssetDirectory: assetDir,
 		// ResourceRateLimit: resourceRateLimit,

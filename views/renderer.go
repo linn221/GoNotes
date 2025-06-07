@@ -2,6 +2,7 @@ package views
 
 import (
 	"html/template"
+	"net/http"
 	"path/filepath"
 )
 
@@ -14,7 +15,7 @@ import (
 //	testTemplate     *template.Template
 //	)
 
-type Renderer struct {
+type Templates struct {
 	loginTemplate *template.Template
 	// registerTemplate *template.Template
 	indexTemplate *template.Template
@@ -39,13 +40,23 @@ func parseTemplateForPage(dir string) func(filenames ...string) *template.Templa
 	}
 }
 
-func NewRenderer(baseDir string) *Renderer {
+func NewEngine(baseDir string) *Templates {
 	templateDir := filepath.Join(baseDir, "../../views/templates")
 	parsePage := parseTemplateForPage(templateDir)
-	return &Renderer{
+	return &Templates{
 		loginTemplate: template.Must(
 			template.New("root").ParseFiles(filepath.Join(templateDir, "login.gotmpl"))),
 		indexTemplate: parsePage("index.gotmpl"),
 		labelTemplate: parsePage("label.gotmpl"),
 	}
+}
+
+type Renderer struct {
+	w         http.ResponseWriter
+	userId    int
+	templates *Templates
+}
+
+func (t *Templates) NewRenderer(w http.ResponseWriter, userId int) *Renderer {
+	return &Renderer{w: w, userId: userId, templates: t}
 }

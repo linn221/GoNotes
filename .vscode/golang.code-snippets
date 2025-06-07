@@ -96,4 +96,13 @@
 			"}"
 		],
 	},
+	"new snippettss": {
+		"prefix": "details",
+		"body": [
+			"<details>",
+			"<summary>$1</summary>",
+			"$0",
+			"</details>",
+		],
+	},
 }

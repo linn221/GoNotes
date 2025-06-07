@@ -16,17 +16,17 @@ func (app *App) Serve() {
 		w.Write([]byte("hello world, you are authed"))
 	})
 
-	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(app.Renderer, app.DB))
-	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(app.Renderer))
-	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(app.Renderer, app.DB))
-	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(app.Renderer, app.DB))
-	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(app.Renderer, app.DB))
+	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(app.Templates, app.DB))
+	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(app.Templates))
+	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(app.Templates, app.DB))
+	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(app.Templates, app.DB))
+	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(app.Templates, app.DB))
 	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(app.DB))
 	// authMux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {})
 
 	mainMux := http.NewServeMux()
 	// public routes
-	mainMux.HandleFunc("/login", handlers.HandleLogin(app.Renderer, app.DB, app.Cache))
+	mainMux.HandleFunc("/login", handlers.HandleLogin(app.Templates, app.DB, app.Cache))
 
 	// mainMux.Handle("/api/", http.StripPrefix("/api", middlewares.Auth(authMux)))
 	// file upload

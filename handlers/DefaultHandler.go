@@ -1,8 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"linn221/shop/myctx"
-	"linn221/shop/services"
+	"linn221/shop/views"
 	"net/http"
 )
 
@@ -10,7 +11,9 @@ type DefaultSession struct {
 	UserId int
 }
 
-func DefaultHandler(handle func(http.ResponseWriter, *http.Request, *DefaultSession) error) http.HandlerFunc {
+type DefaultHandlerFunc func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error
+
+func DefaultHandler(t *views.Templates, handle DefaultHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
@@ -23,31 +26,12 @@ func DefaultHandler(handle func(http.ResponseWriter, *http.Request, *DefaultSess
 			UserId: userId,
 		}
 
-		err = handle(w, r, &session)
+		renderer := t.NewRenderer(w, userId)
+
+		err = handle(ctx, r, &session, renderer)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
-	}
-}
-
-func DefaultListHandler[T any](listService services.Lister[T]) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		ctx := r.Context()
-		_, shopId, err := myctx.GetIdsFromContext(ctx)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		resourceSlice, err := listService.List(shopId)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-
-		finalErrHandle(w,
-			respondOk(w, resourceSlice),
-		)
 	}
 }

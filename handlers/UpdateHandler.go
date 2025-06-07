@@ -1,18 +1,20 @@
 package handlers
 
 import (
+	"context"
 	"linn221/shop/myctx"
+	"linn221/shop/views"
 	"net/http"
 	"strconv"
 )
 
 type UpdateResource[T any] struct {
-	parseInput       func(*http.Request) (*T, formErrors)
-	handleParseError func(http.ResponseWriter, *http.Request, *Session, *T, formErrors) error
-	handle           func(http.ResponseWriter, *http.Request, *Session, *T) error
+	parseInput       func(r *http.Request) (*T, formErrors)
+	handleParseError func(ctx context.Context, r *http.Request, session *Session, input *T, fe formErrors, renderer *views.Renderer) error
+	handle           func(ctx context.Context, r *http.Request, session *Session, input *T, renderer *views.Renderer) error
 }
 
-func UpdateHandler[T any](res UpdateResource[T]) http.HandlerFunc {
+func UpdateHandler[T any](t *views.Templates, res UpdateResource[T]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
@@ -37,17 +39,18 @@ func UpdateHandler[T any](res UpdateResource[T]) http.HandlerFunc {
 			ResId:  resId,
 		}
 
+		renderer := t.NewRenderer(w, userId)
 		input, ferrs := res.parseInput(r)
 		if len(ferrs) > 0 {
 			w.Header().Add("HX-Retarget", "#edit-form")
 			w.Header().Add("HX-Reswap", "outerHTML")
 			finalErrHandle(w,
-				res.handleParseError(w, r, &session, input, ferrs),
+				res.handleParseError(r.Context(), r, &session, input, ferrs, renderer),
 			)
 			return
 		}
 
-		err = res.handle(w, r, &session, input)
+		err = res.handle(ctx, r, &session, input, renderer)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

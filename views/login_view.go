@@ -5,7 +5,7 @@ import (
 	"net/http"
 )
 
-func (r *Renderer) LoginFormWithErrors(w http.ResponseWriter, input *models.User, errMap map[string]error) error {
+func (r *Templates) LoginFormWithErrors(w http.ResponseWriter, input *models.User, errMap map[string]error) error {
 
 	data := map[string]FormError{
 		"username": NewFormError(input.Username, errMap["username"]),
@@ -14,10 +14,10 @@ func (r *Renderer) LoginFormWithErrors(w http.ResponseWriter, input *models.User
 	return r.loginTemplate.ExecuteTemplate(w, "error_view", data)
 }
 
-func (r *Renderer) Index(w http.ResponseWriter) error {
+func (r *Templates) Index(w http.ResponseWriter) error {
 	return r.indexTemplate.Execute(w, nil)
 }
 
-func (r *Renderer) LoginPage(w http.ResponseWriter) error {
+func (r *Templates) LoginPage(w http.ResponseWriter) error {
 	return r.loginTemplate.Execute(w, nil)
 }

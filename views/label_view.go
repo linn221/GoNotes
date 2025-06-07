@@ -2,52 +2,52 @@ package views
 
 import (
 	"linn221/shop/models"
-	"net/http"
 )
 
-func (r *Renderer) LabelCreateForm(w http.ResponseWriter, userId int) error {
-	return r.labelTemplate.ExecuteTemplate(w, "create_form", nil)
+func (r *Renderer) LabelCreateForm() error {
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_form", nil)
 }
 
-func (r *Renderer) LabelCreateError(w http.ResponseWriter, userId int, input *models.Label, errmap map[string]error) error {
+func (r *Renderer) LabelCreateError(input *models.Label, errmap map[string]error) error {
 
 	m := map[string]FormError{
 		"name":        NewFormError(input.Name, errmap["name"]),
 		"description": NewFormError(input.Description, errmap["description"]),
 	}
-	return r.labelTemplate.ExecuteTemplate(w, "create_form2", m)
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_form2", m)
 }
 
-func (r *Renderer) LabelCreateOk(w http.ResponseWriter, label *models.Label) error {
-	return r.labelTemplate.ExecuteTemplate(w, "create_success", map[string]any{
+func (r *Renderer) LabelCreateOk(label *models.Label) error {
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_success", map[string]any{
 		"Res": label,
 	})
 }
 
-func (r *Renderer) LabelUpdateOk(w http.ResponseWriter, label *models.Label) error {
-	return r.labelTemplate.ExecuteTemplate(w, "edit_success", map[string]any{
+func (r *Renderer) LabelUpdateOk(label *models.Label) error {
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "edit_success", map[string]any{
 		"Res": label,
 	})
 }
 
-func (r *Renderer) LabelEditForm(w http.ResponseWriter, userId int, resId int, input *models.Label) error {
-	return r.labelTemplate.ExecuteTemplate(w, "edit_form", map[string]any{
+func (r *Renderer) LabelEditForm(resId int, input *models.Label) error {
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "edit_form", map[string]any{
 		"Res": input,
 		"Id":  resId,
 	})
 }
-func (r *Renderer) LabelUpdateError(w http.ResponseWriter, userId int, resId int, input *models.Label, errMap map[string]error) error {
+
+func (r *Renderer) LabelUpdateError(resId int, input *models.Label, errMap map[string]error) error {
 
 	m := map[string]any{
 		"Id":          resId,
 		"name":        NewFormError(input.Name, errMap["name"]),
 		"description": NewFormError(input.Description, errMap["description"]),
 	}
-	return r.labelTemplate.ExecuteTemplate(w, "edit_form2", m)
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "edit_form2", m)
 }
 
-func (r *Renderer) LabelIndexPage(w http.ResponseWriter, labels []models.Label) error {
-	return r.labelTemplate.ExecuteTemplate(w, "root", map[string]any{
+func (r *Renderer) LabelIndexPage(labels []models.Label) error {
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "root", map[string]any{
 		"ResList": labels,
 	})
 }

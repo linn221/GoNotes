@@ -27,7 +27,7 @@ func parseLoginForm(r *http.Request) (*models.User, map[string]error) {
 	return &input, m
 }
 
-func HandleLogin(vr *views.Renderer,
+func HandleLogin(vr *views.Templates,
 	db *gorm.DB,
 	cache services.CacheService,
 ) http.HandlerFunc {
@@ -100,7 +100,7 @@ func newSessionToken(cache services.CacheService, userId int) (string, error) {
 	return tokenString, nil
 }
 
-func HandleLogout(cache services.CacheService, vr *views.Renderer) http.HandlerFunc {
+func HandleLogout(cache services.CacheService, vr *views.Templates) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookies, err := r.Cookie("token")
 		if err != nil {

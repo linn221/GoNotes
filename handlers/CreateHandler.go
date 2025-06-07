@@ -1,17 +1,19 @@
 package handlers
 
 import (
+	"context"
 	"linn221/shop/myctx"
+	"linn221/shop/views"
 	"net/http"
 )
 
 type CreateResource[T any] struct {
 	parseInput       func(*http.Request) (*T, formErrors)
-	handleParseError func(http.ResponseWriter, *http.Request, *DefaultSession, *T, formErrors) error
-	handle           func(http.ResponseWriter, *http.Request, *DefaultSession, *T) error
+	handleParseError func(ctx context.Context, r *http.Request, session *DefaultSession, input *T, fe formErrors, vr *views.Renderer) error
+	handle           func(ctx context.Context, r *http.Request, session *DefaultSession, input *T, vr *views.Renderer) error
 }
 
-func CreateHandler[T any](res CreateResource[T]) http.HandlerFunc {
+func CreateHandler[T any](t *views.Templates, res CreateResource[T]) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
@@ -20,32 +22,22 @@ func CreateHandler[T any](res CreateResource[T]) http.HandlerFunc {
 			return
 		}
 
-		// resIdStr := r.PathValue("id")
-		// if resIdStr == "" {
-		// 	http.Error(w, "resource id is required", http.StatusBadRequest)
-		// 	return
-		// }
-		// resId, err := strconv.Atoi(resIdStr)
-		// if err != nil {
-		// 	http.Error(w, "resource id is required", http.StatusBadRequest)
-		// 	return
-
-		// }
 		session := DefaultSession{
 			UserId: userId,
 		}
 
+		renderer := t.NewRenderer(w, userId)
 		input, ferrs := res.parseInput(r)
 		if len(ferrs) > 0 {
 			w.Header().Add("HX-Retarget", "#create-form")
 			w.Header().Add("HX-Reswap", "outerHTML")
 			finalErrHandle(w,
-				res.handleParseError(w, r, &session, input, ferrs),
+				res.handleParseError(ctx, r, &session, input, ferrs, renderer),
 			)
 			return
 		}
 
-		err = res.handle(w, r, &session, input)
+		err = res.handle(ctx, r, &session, input, renderer)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return

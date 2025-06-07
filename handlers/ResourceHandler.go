@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"context"
 	"linn221/shop/myctx"
+	"linn221/shop/views"
 	"net/http"
 	"strconv"
 )
@@ -11,7 +13,9 @@ type Session struct {
 	ResId  int
 }
 
-func ResourceHandler(handle func(http.ResponseWriter, *http.Request, *Session) error) http.HandlerFunc {
+type ResourceHandlerFunc func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error
+
+func ResourceHandler(t *views.Templates, handle ResourceHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
@@ -35,8 +39,9 @@ func ResourceHandler(handle func(http.ResponseWriter, *http.Request, *Session) e
 			UserId: userId,
 			ResId:  resId,
 		}
+		renderer := t.NewRenderer(w, userId)
 
-		err = handle(w, r, &session)
+		err = handle(ctx, r, &session, renderer)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
