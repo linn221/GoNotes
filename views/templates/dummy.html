@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go + HTMX App</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/htmx.min.js" defer></script>
+    <script src="/static/js/helper.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="alert-container"></div>
+
+        <nav class="navbar">
+            <ul>
+                <li><a href="/tasks" hx-boost="true">Tasks</a></li>
+                <li><a href="/labels" hx-boost="true">Labels</a></li>
+            </ul>
+            <ul>
+                <li>
+                    <button hx-post="/logout">
+                        logout
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <section id="main">
+
+        </section>
+    </div>
+</body>
+</html>

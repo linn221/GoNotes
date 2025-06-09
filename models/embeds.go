@@ -31,3 +31,11 @@ type HasShopId struct {
 func (h HasShopId) GetShopId() string {
 	return h.ShopId
 }
+
+type HasID struct {
+	Id int `gorm:"primaryKey"`
+}
+
+func (h HasID) GetId() int {
+	return h.Id
+}

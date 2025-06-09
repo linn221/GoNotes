@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go + HTMX App</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/htmx.min.js" defer></script>
+    <script src="/static/js/helper.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="alert-container"></div>
+
+        <nav class="navbar">
+            <ul>
+                <li><a href="/tasks" hx-boost="true" class="aria-contrast">Tasks</a></li>
+                <li><a href="/labels" hx-boost="true">Labels</a></li>
+            </ul>
+            <ul>
+                <li>
+                    <button hx-post="/logout">
+                        logout
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <section id="main">
+
+            <button onclick="$('#create-dialog').showModal()">New</button>
+
+            <div id="contents">
+                <article>
+                    <header>Linux Tip</header>
+                    <h4>Analyse frequency of occurence</h4>
+                    Label: <strong>LInux</strong>
+                    <details>
+                        <summary>details</summary>
+                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
+                        nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
+                        officia velit, alias fugit non.
+                        Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
+                        ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus, laborum
+                        facere sed! Voluptatem, ut quae!
+                    </details>
+
+                    <footer>
+                        <button onclick="$('edit-dialog').showModal()">Edit</button>
+                        <button>Delete</button>
+                        <button>Details</button>
+                    </footer>
+                </article>
+
+
+            </div>
+
+            <div id="create-modal">
+                <dialog id="create-dialog">
+                    <form id="create-form">
+
+                        <label>Title</label>
+                        <input type="text" name="title">
+
+                        <label>Description</label>
+                        <textarea name="description" cols="30" rows="2"></textarea>
+
+                        <label>Body</label>
+                        <textarea name="body" cols="30" rows="10"></textarea>
+
+                        <label>Label</label>
+                        <select name="label_id">
+                            <option value="1" selected>Work</option>
+                            <option value="2">Linux</option>
+                            <option value="3">MySQL</option>
+                            <option value="4">Interview</option>
+                        </select>
+
+
+                        <button type="submit">Create</button>
+                        <button type="button" onclick="$('#create-dialog').close()">Close</button>
+                    </form>
+                </dialog>
+            </div>
+            <div id="edit-modal">
+                <dialog id="edit-dialog">
+                    <form id="edit-form"></form>
+                </dialog>
+            </div>
+            <div id="details-modal"></div>
+
+        </section>
+    </div>
+</body>
+
+</html>

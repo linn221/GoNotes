@@ -105,4 +105,10 @@
 			"</details>",
 		],
 	},
+		"new snippettt label": {
+			"prefix": "labell",
+			"body": [
+				"<label>$0</label>"
+			],
+		},
 }

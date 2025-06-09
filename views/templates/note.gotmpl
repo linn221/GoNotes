@@ -1,0 +1,117 @@
+{{/* .ResList */}}
+{{define "main"}}
+    <button hx-get="/notes/new" hx-target="#create-modal">New</button>
+
+    <div id="contents">
+        {{ range .ResList }}
+            {{template "card" .}}
+        {{end}}
+    </div>
+
+    <div id="create-modal"></div>
+    <div id="edit-modal"></div>
+    <div id="details-modal"></div>
+
+{{end}}
+
+{{/* @[Id Name] */}}
+{{ define "card" }}
+    <article id="note-{{.Id}}">
+        <header>{{.Title}}</header>
+        <h4>{{.Description}}</h4>
+        Label: {{.Label.Name}}
+        <details>
+            <summary>details</summary>
+            {{.Body}}
+        </details>
+
+        <footer>
+            <button hx-get="/notes/{{.Id}}/edit" hx-target="#edit-modal">Edit</button>
+            <button hx-delete="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="delete">Delete</button>
+            <button>Details</button>
+        </footer>
+    </article>
+{{end}}
+
+{{ define "create_form" }}
+    <dialog open id="create-dialog">
+        <form hx-post="/notes"
+            id="create-form"
+            hx-target="#contents"
+            hx-swap="afterbegin">
+            <label>Name</label>
+            <input type="text" name="name">
+
+            <button type="submit">Create</button>
+            <button type="button" onclick="$('#create-dialog').close()">Close</button>
+        </form>
+    </dialog>
+{{end}}
+
+{{/* @[Res] */}}
+{{ define "create_success" }}
+    {{template "row" .Res }}
+    <div id="create-modal" hx-swap-oob="true"></div>
+{{end}}
+
+{{/* @[name] */}}
+{{ define "create_form2" }}
+    <form hx-post="/labels"
+    id="create-form"
+    hx-target="#contents"
+    hx-swap="afterbegin"
+    >
+        
+        <label>Name</label>
+        <input type="text" name="name" aria-invalid="{{.name.Invalid}}" value="{{.name.Vlu}}">
+        {{with .name.Err}}
+            <small>{{.}}</small>
+        {{end}}
+
+        <button type="submit">Create</button>
+        <button type="button" onclick="$('#create-dialog').close()">Close</button>
+    </form>
+{{end}}
+
+{{/* @[Id .Res] */}}
+{{define "edit_form"}}
+    <dialog open id="edit-dialog">
+    <form hx-put="/labels/{{.Id}}"
+    id="edit-form"
+    hx-target="#row-{{.Id}}"
+    hx-swap="outerHTML"
+    >
+
+    <label>Name</label>
+    <input type="text" name="name" value="{{.Res.Name}}">
+    <button type="submit">Update</button>
+    <button type="button" onclick="$('#edit-dialog').close()">Close</button>
+
+    </form>
+    </dialog>
+{{end}}
+
+{{/* @[Res] */}}
+{{define "edit_success"}}
+    {{template "row" .Res}}
+    <div id="edit-modal" hx-swap-oob="true"></div>
+{{end}}
+
+{{/* @[Id name] */}}
+{{define "edit_form2"}}
+    <form hx-put="/labels/{{.Id}}"
+    id="edit-form"
+    hx-target="#row-{{.Id}}"
+    hx-swap="outerHTML"
+    >
+
+    <label>Name</label>
+    <input type="text" name="name" value="{{.name.Vlu}}" aria-invalid="{{.name.Invalid}}">
+    {{with .name.Err}}
+        <small>{{.}}</small>
+    {{end}}
+    <button type="submit">Update</button>
+    <button type="button" onclick="$('#edit-dialog').close()">Close</button>
+
+    </form>
+{{end}}
