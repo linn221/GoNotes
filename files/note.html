@@ -36,53 +36,78 @@
             <div id="contents">
                 <article>
                     <header>Linux Tip</header>
-                    <h4>Analyse frequency of occurence</h4>
-                    Label: <strong>LInux</strong>
+                    <p>
+                        Label: <strong><a href="/notes?label_id=2">Linux</a></strong>
+                    </p>
                     <details>
-                        <summary>details</summary>
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
-                        nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
-                        officia velit, alias fugit non.
-                        Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
-                        ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus, laborum
-                        facere sed! Voluptatem, ut quae!
+                        <summary>
+                            <h4>Analyse frequency of occurence</h4>
+                        </summary>
+                        <div>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
+                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
+                            officia velit, alias fugit non.
+                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
+                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
+                            laborum
+                            facere sed! Voluptatem, ut quae!
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
+                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
+                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
+                            officia velit, alias fugit non.
+                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
+                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
+                            officia velit, alias fugit non.
+                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
+                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
+                        </div>
+                        <p>
+                            Created At: <strong>Jan 27 8:00 PM</strong>
+                        </p>
                     </details>
 
                     <footer>
                         <button onclick="$('edit-dialog').showModal()">Edit</button>
                         <button>Delete</button>
-                        <button>Details</button>
                     </footer>
                 </article>
 
+                <article>
+                    <header>Linux Tip#2</header>
+                    <p>
+                        Remind: <strong>July 27</strong>
+                    </p>
+                    Label: <strong><a href="/notes?label_id=2">Linux</a></strong>
+                    <details>
+                        <summary>
+                            <h4>Count words</h4>
+                        </summary>
+                        <div>
+                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
+                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
+                            officia velit, alias fugit non.
+                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
+                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
+                            laborum
+                            facere sed! Voluptatem, ut quae!
+                        </div>
+                        <p>
+                            Created At: <strong>Jan 27 9:00 PM</strong>
+                            Updated At: <strong>Jan 28 8:10 PM</strong>
+                        </p>
+                    </details>
+
+                    <footer>
+                        <button onclick="$('edit-dialog').showModal()">Edit</button>
+                        <button>Delete</button>
+                    </footer>
+                </article>
 
             </div>
 
             <div id="create-modal">
                 <dialog id="create-dialog">
-                    <form id="create-form">
-
-                        <label>Title</label>
-                        <input type="text" name="title">
-
-                        <label>Description</label>
-                        <textarea name="description" cols="30" rows="2"></textarea>
-
-                        <label>Body</label>
-                        <textarea name="body" cols="30" rows="10"></textarea>
-
-                        <label>Label</label>
-                        <select name="label_id">
-                            <option value="1" selected>Work</option>
-                            <option value="2">Linux</option>
-                            <option value="3">MySQL</option>
-                            <option value="4">Interview</option>
-                        </select>
-
-
-                        <button type="submit">Create</button>
-                        <button type="button" onclick="$('#create-dialog').close()">Close</button>
-                    </form>
                 </dialog>
             </div>
             <div id="edit-modal">

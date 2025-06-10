@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go + HTMX App</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/htmx.min.js" defer></script>
+    <script src="/static/js/helper.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="alert-container"></div>
+
+        <nav class="navbar">
+            <ul>
+                <li><a href="/tasks" hx-boost="true">Tasks</a></li>
+                <li><a href="/labels" hx-boost="true">Labels</a></li>
+            </ul>
+            <ul>
+                <li>
+                    <button hx-post="/logout">
+                        logout
+                    </button>
+                </li>
+            </ul>
+        </nav>
+        <section id="main">
+            <h3>New Note</h3>
+            <form id="create-form">
+
+                <label>Title</label>
+                <input type="text" name="title" required>
+
+                <label>Description</label>
+                <textarea name="description" cols="30" rows="2"></textarea>
+
+                <label>Body</label>
+                <textarea name="body" cols="30" rows="10"></textarea>
+
+                <label>Label</label>
+                <select name="label_id">
+                    <option value="1" selected>Work</option>
+                    <option value="2">Linux</option>
+                    <option value="3">MySQL</option>
+                    <option value="4">Interview</option>
+                </select>
+
+                <label>Remind:</label>
+                <input type="date" name="remind">
+
+                <button type="submit">Create</button>
+            </form>
+        </section>
+    </div>
+</body>
+
+</html>
