@@ -22,7 +22,8 @@ func (app *App) Serve() {
 	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(app.Templates, app.DB))
 	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(app.Templates, app.DB))
 	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(app.DB))
-	// authMux.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {})
+
+	authMux.HandleFunc("GET /notes", handlers.ShowLabelIndex(app.Templates, app.DB))
 
 	mainMux := http.NewServeMux()
 	// public routes

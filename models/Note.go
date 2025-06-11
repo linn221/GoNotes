@@ -1,6 +1,10 @@
 package models
 
-import "time"
+import (
+	"time"
+
+	"gorm.io/gorm"
+)
 
 type Note struct {
 	HasID
@@ -12,4 +16,24 @@ type Note struct {
 	Label        Label
 	Reminder     time.Time `gorm:"index"`
 	HasUserId
+}
+
+type NoteResource struct {
+	Id           int
+	Title        string
+	Description  string
+	Body         string
+	LabelId      int
+	LabelName    string
+	ParentNoteId int
+	Reminder     time.Time
+}
+
+type NoteService struct {
+	db *gorm.DB
+}
+
+func (service *NoteService) ListNotes(userId int) ([]NoteResource, error) {
+
+	panic("2d")
 }

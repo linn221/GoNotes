@@ -19,18 +19,6 @@ type CacheService interface {
 	RemoveKeys(keys ...string) error
 }
 
-type Getter[T any] interface {
-	Get(shopId string, id int) (*T, bool, error)
-	CleanCache(id int) error
-}
-type Lister[T any] interface {
-	List(shopId string) ([]T, error)
-	CleanCache(shopId string) error
-}
-
-type CleanInstanceCache func(id int) error
-type CleanListingCache func(shopId string) error
-
 type HasIsActiveStatus interface {
 	GetIsActive() bool
 }
