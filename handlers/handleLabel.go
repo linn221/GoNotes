@@ -53,28 +53,28 @@ func ShowLabelIndex(t *views.Templates, db *gorm.DB) http.HandlerFunc {
 }
 
 func HandleLabelUpdate(t *views.Templates, db *gorm.DB) http.HandlerFunc {
-	res := UpdateResource[models.Label]{
-		parseInput: parseLabel,
-		handleParseError: func(ctx context.Context, r *http.Request, session *Session, input *models.Label, fe formErrors, renderer *views.Renderer) error {
-			return renderer.LabelUpdateError(session.ResId, input, fe)
-		},
-		handle: func(ctx context.Context, r *http.Request, s *Session, input *models.Label, vr *views.Renderer) error {
-
-			var label models.Label
-			if err := db.WithContext(ctx).First(&label, s.ResId).Error; err != nil {
-				return err
-			}
-			updates := map[string]any{
-				"Name":        input.Name,
-				"Description": input.Description,
-			}
-			if err := db.WithContext(ctx).Model(&label).Updates(updates).Error; err != nil {
-				return err
-			}
-			return vr.LabelUpdateOk(&label)
-		},
+	handleParseError := func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Label, fe formErrors, renderer *views.Renderer) error {
+		return renderer.LabelUpdateError(session.ResId, input, fe)
 	}
-	return UpdateHandler(t, res)
+	handle := func(w http.ResponseWriter, r *http.Request, s *Session, input *models.Label, fe formErrors, vr *views.Renderer) error {
+		if len(fe) > 0 {
+			return handleParseError(w, r, s, input, fe, vr)
+		}
+		ctx := r.Context()
+		var label models.Label
+		if err := db.WithContext(ctx).First(&label, s.ResId).Error; err != nil {
+			return err
+		}
+		updates := map[string]any{
+			"Name":        input.Name,
+			"Description": input.Description,
+		}
+		if err := db.WithContext(ctx).Model(&label).Updates(updates).Error; err != nil {
+			return err
+		}
+		return vr.LabelUpdateOk(&label)
+	}
+	return UpdateHandler(t, parseLabel, handle)
 }
 
 func HandleLabelDelete(db *gorm.DB) http.HandlerFunc {
@@ -94,20 +94,20 @@ func HandleLabelDelete(db *gorm.DB) http.HandlerFunc {
 
 func HandleLabelCreate(t *views.Templates, db *gorm.DB) http.HandlerFunc {
 
-	res := CreateResource[models.Label]{
-
-		parseInput: parseLabel,
-		handleParseError: func(ctx context.Context, r *http.Request, session *DefaultSession, input *models.Label, fe formErrors, vr *views.Renderer) error {
-			return vr.LabelCreateError(input, fe)
-		},
-
-		handle: func(ctx context.Context, r *http.Request, session *DefaultSession, input *models.Label, vr *views.Renderer) error {
-
-			if err := db.WithContext(r.Context()).Create(&input).Error; err != nil {
-				return err
-			}
-			return vr.LabelCreateOk(input)
-		},
+	handleParseError := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, fe formErrors, vr *views.Renderer) error {
+		w.Header().Add("HX-Retarget", "#create-form")
+		w.Header().Add("HX-Reswap", "outerHTML")
+		return vr.LabelCreateError(input, fe)
 	}
-	return CreateHandler(t, res)
+
+	handle := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, fe formErrors, vr *views.Renderer) error {
+		if len(fe) > 0 {
+			return handleParseError(w, r, session, input, fe, vr)
+		}
+		if err := db.WithContext(r.Context()).Create(&input).Error; err != nil {
+			return err
+		}
+		return vr.LabelCreateOk(input)
+	}
+	return CreateHandler(t, parseLabel, handle)
 }
