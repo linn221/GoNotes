@@ -1,0 +1,64 @@
+{{define "main"}}
+<section id="main">
+    <h3>New Note</h3>
+    <form id="create-form" hx-post="/notes" hx-swap="outerHTML">
+
+	<label>Title</label>
+	<input type="text" name="title" required>
+
+	<label>Description</label>
+	<textarea name="description" cols="30" rows="2"></textarea>
+
+	<label>Body</label>
+	<textarea name="body" cols="30" rows="10"></textarea>
+
+	<label>Label</label>
+	<select name="label_id">
+		{{range .Labels}}
+		    <option value="{{.Id}}">{{.Name}}</option>
+		{{end}}
+	</select>
+
+	<label>Remind:</label>
+	<input type="date" name="remind">
+
+	<button type="submit">Create</button>
+	<a href="/notes" hx-boost="true" role="button">Notes</a>
+    </form>
+</section>
+{{end}}
+
+{{define "create_form2"}}
+    <form id="create-form" hx-post="/notes" hx-swap="outerHTML">
+
+	<label>Title</label>
+	<input type="text" name="title" required
+	value="{{.title.Vlu}}" aria-invalid="{{.title.Invalid}}">
+	{{with .title.Err}}
+		<small>{{.}}</small>
+	{{end}}
+
+	<label>Description</label>
+	<textarea name="description" cols="30" rows="2">{{.description.Vlu}}</textarea>
+
+	<label>Body</label>
+	<textarea name="body" cols="30" rows="10">{{.body.Vlu}}</textarea>
+
+	<label>Label</label>
+	<select name="label_id" aria-invalid="{{.label_id.Invalid}}">
+		{{$labelId := .label_id.Vlu}}
+		{{range .Labels}}
+		    <option value="{{.Id}}" {{if eq .Id $labelId}}selected{{end}}>{{.Name}}</option>
+		{{end}}
+	</select>
+
+	<label>Remind:</label>
+	<input type="date" name="remind" aria-invalid="{{.remind.Invalid}}" value="{{.remind.Vlu}}">
+	{{with .remind.Err}}
+	<small>{{.}}</small>
+	{{end}}
+
+	<button type="submit">Create</button>
+	<a href="/notes" hx-boost="true" role="button">Notes</a>
+    </form>
+{{end}}

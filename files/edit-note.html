@@ -31,21 +31,22 @@
         </nav>
         <section id="main">
             <h3>New Note</h3>
-            <form id="create-form">
+            <form id="edit-form">
 
                 <label>Title</label>
-                <input type="text" name="title" required>
+                <input type="text" name="title" required
+                value="Linux Tip">
 
                 <label>Description</label>
-                <textarea name="description" cols="30" rows="2"></textarea>
+                <textarea name="description" cols="30" rows="2">hello world</textarea>
 
                 <label>Body</label>
-                <textarea name="body" cols="30" rows="10"></textarea>
+                <textarea name="body" cols="30" rows="10">Lorem ipsum dolor sit amet consectetur adipisicing elit. Amet voluptas deserunt dolore nisi rem dolorem, ut harum eligendi! Illum ipsam id veniam magnam nulla repellat, amet provident omnis ad ducimus!</textarea>
 
                 <label>Label</label>
                 <select name="label_id">
-                    <option value="1" selected>Work</option>
-                    <option value="2">Linux</option>
+                    <option value="1">Work</option>
+                    <option value="2" selected>Linux</option>
                     <option value="3">MySQL</option>
                     <option value="4">Interview</option>
                 </select>
@@ -53,7 +54,7 @@
                 <label>Remind:</label>
                 <input type="date" name="remind">
 
-                <button type="submit">Create</button>
+                <button type="submit">Update</button>
                 <a href="note.html" hx-boost="true" role="button">Notes</a>
             </form>
         </section>

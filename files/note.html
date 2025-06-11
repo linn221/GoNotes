@@ -18,7 +18,7 @@
 
         <nav class="navbar">
             <ul>
-                <li><a href="/tasks" hx-boost="true" class="aria-contrast">Tasks</a></li>
+                <li><a href="note.html" hx-boost="true">Notes</a></li>
                 <li><a href="/labels" hx-boost="true">Labels</a></li>
             </ul>
             <ul>
@@ -31,91 +31,105 @@
         </nav>
         <section id="main">
 
-            <button onclick="$('#create-dialog').showModal()">New</button>
+            <a href="new-note.html" role="button">New</a>
 
             <div id="contents">
-                <article>
-                    <header>Linux Tip</header>
+                <article id="note-1">
+                    <header>
+                        <h3>Linux Tip</h3>
+                    </header>
+
                     <p>
-                        Label: <strong><a href="/notes?label_id=2">Linux</a></strong>
+                        <small>Label:</small>
+                        <strong><a href="/notes?label_id=2">Linux</a></strong>
                     </p>
+
                     <details>
                         <summary>
-                            <h4>Analyse frequency of occurence</h4>
+                            <strong>Analyse frequency of occurrence</strong>
                         </summary>
-                        <div>
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
-                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
-                            officia velit, alias fugit non.
-                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
-                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
-                            laborum
-                            facere sed! Voluptatem, ut quae!
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
-                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
-                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
-                            officia velit, alias fugit non.
-                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
-                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
-                            officia velit, alias fugit non.
-                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
-                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
+
+                        <div x-data="{ edit: false }">
+                            <div x-show="edit">
+                                <form hx-patch="/note/1" hx-target="#note-1" hx-swap="outerHTML">
+                                    <label><strong>Edit Body</strong></label>
+                                    <textarea name="body">BODY</textarea>
+                                    <div>
+                                        <button type="submit" class="secondary">Submit</button>
+                                        <button type="button" @click="edit = false" class="contrast">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div x-show="!edit">
+                                <button @click="edit = true" class="secondary outline">Edit Inline</button>
+                                <div>
+                                    <p>Body</p>
+                                </div>
+                            </div>
                         </div>
-                        <p>
-                            Created At: <strong>Jan 27 8:00 PM</strong>
-                        </p>
+
+                        <footer>
+                            <small>Created At: <strong>Jan 27 8:00 PM</strong></small>
+                            <br>
+                            <small>Updated At: <strong>Jan 28 8:00 PM</strong></small>
+                        </footer>
                     </details>
 
                     <footer>
-                        <button onclick="$('edit-dialog').showModal()">Edit</button>
-                        <button>Delete</button>
+                        <a href="edit-note.html" role="button" class="secondary">Edit</a>
+                        <button class="contrast">Delete</button>
                     </footer>
                 </article>
 
-                <article>
-                    <header>Linux Tip#2</header>
+                <article id="note-2">
+                    <header>
+                        <h3>Mysql delete rows</h3>
+                    </header>
+
                     <p>
-                        Remind: <strong>July 27</strong>
+                        <small>Label:</small>
+                        <strong><a href="/notes?label_id=3">Backend</a></strong>
                     </p>
-                    Label: <strong><a href="/notes?label_id=2">Linux</a></strong>
+
                     <details>
                         <summary>
-                            <h4>Count words</h4>
+                            <strong>Mysql delete rows</strong>
                         </summary>
-                        <div>
-                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Soluta autem nihil veniam maxime
-                            nostrum quibusdam consequatur temporibus vero sunt tenetur in ipsam, quas repellat, cumque
-                            officia velit, alias fugit non.
-                            Placeat repellendus expedita quia sit numquam corporis sed deleniti consequuntur dolorem
-                            ducimus. Repudiandae cum quis atque sit maiores, quisquam a quidem rerum ipsum possimus,
-                            laborum
-                            facere sed! Voluptatem, ut quae!
+
+                        <div x-data="{ edit: false }">
+                            <div x-show="edit">
+                                <form hx-patch="/note/1" hx-target="#note-1" hx-swap="outerHTML">
+                                    <label><strong>Edit Body</strong></label>
+                                    <textarea name="body">delete</textarea>
+                                    <div>
+                                        <button type="submit" class="secondary">Submit</button>
+                                        <button type="button" @click="edit = false" class="contrast">Cancel</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <div x-show="!edit">
+                                <button @click="edit = true" class="secondary outline">Edit Inline</button>
+                                <div>
+                                    <p>Body</p>
+                                </div>
+                            </div>
                         </div>
-                        <p>
-                            Created At: <strong>Jan 27 9:00 PM</strong>
-                            Updated At: <strong>Jan 28 8:10 PM</strong>
-                        </p>
+
+                        <footer>
+                            <small>Created At: <strong>Jan 27 8:00 PM</strong></small>
+                            <br>
+                            <small>Updated At: <strong>Jan 28 8:00 PM</strong></small>
+                        </footer>
                     </details>
 
                     <footer>
-                        <button onclick="$('edit-dialog').showModal()">Edit</button>
-                        <button>Delete</button>
+                        <a href="edit-note.html" role="button" class="secondary">Edit</a>
+                        <button class="contrast">Delete</button>
                     </footer>
                 </article>
-
             </div>
-
-            <div id="create-modal">
-                <dialog id="create-dialog">
-                </dialog>
-            </div>
-            <div id="edit-modal">
-                <dialog id="edit-dialog">
-                    <form id="edit-form"></form>
-                </dialog>
-            </div>
-            <div id="details-modal"></div>
 
         </section>
     </div>

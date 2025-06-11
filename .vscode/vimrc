@@ -1,0 +1,12 @@
+syntax on
+autocmd BufRead,BufNewFile *.gotmpl set filetype=gotmpl
+
+autocmd FileType gotmpl inoremap { {{}}<Left><Left>
+
+
+augroup AlwaysHighlightDoubleBraces
+  autocmd!
+  autocmd BufRead,BufNewFile *.gotmpl syntax match DoubleBraces /{{[^}]*}}/
+  autocmd BufRead,BufNewFile *.gotmpl highlight DoubleBraces ctermfg=Red cterm=bold guifg=Red gui=bold
+augroup END
+
