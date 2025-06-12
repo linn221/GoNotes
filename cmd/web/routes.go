@@ -16,14 +16,14 @@ func (app *App) Serve() {
 		w.Write([]byte("hello world, you are authed"))
 	})
 
-	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(app.Templates, app.DB))
+	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(app.Templates, app.Services.LabelService))
 	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(app.Templates))
-	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(app.Templates, app.DB))
-	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(app.Templates, app.DB))
-	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(app.Templates, app.DB))
-	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(app.DB))
+	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(app.Templates, app.Services.LabelService))
+	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(app.Templates, app.Services.LabelService))
+	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(app.Templates, app.Services.LabelService))
+	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(app.Services.LabelService))
 
-	authMux.HandleFunc("GET /notes", handlers.ShowLabelIndex(app.Templates, app.DB))
+	// authMux.HandleFunc("GET /notes", handlers.ShowLabelIndex(app.Templates, app.DB))
 
 	mainMux := http.NewServeMux()
 	// public routes

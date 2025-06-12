@@ -6,18 +6,20 @@ import (
 	"gorm.io/gorm"
 )
 
-type ReadServices struct {
+type CrudServices struct {
 	// CategoryGetService  services.Getter[CategoryDetailResource]
 	// CategoryListService services.Lister[CategoryResource]
 	// UnitGetService      services.Getter[UnitDetailResource]
 	// UnitListService     services.Lister[UnitResource]
 	// ItemGetService      services.Getter[ItemDetailResource]
 	// ItemListService     services.Lister[ItemResource]
-	NoteService NoteService
+	NoteService  *NoteService
+	LabelService *LabelService
 }
 
-func NewReaders(db *gorm.DB, cache services.CacheService) *ReadServices {
-	return &ReadServices{
-		NoteService: NoteService{db: db},
+func NewServices(db *gorm.DB, cache services.CacheService) *CrudServices {
+	return &CrudServices{
+		NoteService:  &NoteService{db: db},
+		LabelService: &LabelService{db: db},
 	}
 }

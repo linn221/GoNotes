@@ -1,6 +1,7 @@
 package models
 
 import (
+	"context"
 	"time"
 
 	"gorm.io/gorm"
@@ -18,6 +19,11 @@ type Note struct {
 	HasUserId
 }
 
+func (input *Note) validate(db *gorm.DB, userId int, id int) error {
+
+	panic("2d")
+}
+
 type NoteResource struct {
 	Id           int
 	Title        string
@@ -33,7 +39,30 @@ type NoteService struct {
 	db *gorm.DB
 }
 
-func (service *NoteService) ListNotes(userId int) ([]NoteResource, error) {
+func (s *NoteService) Create(ctx context.Context, userId int, input *Note) (*Note, error) {
+
+	panic("2d")
+}
+
+func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Note) (*Note, error) {
+
+	panic("2d")
+}
+
+func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body string) (*Note, error) {
+	panic("2d")
+}
+
+func (s *NoteService) Delete(ctx context.Context, userId int, id int) (*Note, error) {
+	panic("2d")
+}
+
+func (s *NoteService) Get(ctx context.Context, userId int, id int) (*NoteResource, error) {
+
+	panic("2d")
+}
+
+func (s *NoteService) ListNotes(ctx context.Context, userId int) ([]NoteResource, error) {
 
 	panic("2d")
 }

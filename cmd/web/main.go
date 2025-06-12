@@ -14,7 +14,7 @@ func main() {
 	redisCache := config.ConnectRedis(ctx)
 	dir := config.GetImageDirectory()
 	port := config.GetPortNo()
-	readServices := models.NewReaders(db, redisCache)
+	services := models.NewServices(db, redisCache)
 	templates := views.NewEngine(config.GetBaseDir())
 	assetDir := filepath.Join(config.GetBaseDir(), "../../files")
 
@@ -37,7 +37,7 @@ func main() {
 		DB:             db,
 		Cache:          redisCache,
 		ImageDirectory: dir,
-		Readers:        readServices,
+		Services:       services,
 		Templates:      templates,
 		Port:           port,
 		AssetDirectory: assetDir,

@@ -6,8 +6,6 @@ import (
 	"linn221/shop/models"
 	"linn221/shop/views"
 	"net/http"
-
-	"gorm.io/gorm"
 )
 
 func parseLabel(r *http.Request) (*models.Label, formErrors) {
@@ -30,21 +28,21 @@ func ShowLabelCreate(t *views.Templates) http.HandlerFunc {
 	})
 }
 
-func ShowLabelEdit(t *views.Templates, db *gorm.DB) http.HandlerFunc {
+func ShowLabelEdit(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error {
-		var label models.Label
-		if err := db.First(&label, session.ResId).Error; err != nil {
+		label, err := labelService.Get(r.Context(), session.UserId, session.ResId)
+		if err != nil {
 			return err
 		}
-		return vr.LabelEditForm(session.ResId, &label)
+		return vr.LabelEditForm(session.ResId, label)
 	}
 	return ResourceHandler(t, h)
 }
 
-func ShowLabelIndex(t *views.Templates, db *gorm.DB) http.HandlerFunc {
+func ShowLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
-		var results []models.Label
-		if err := db.Find(&results).Error; err != nil {
+		results, err := labelService.List(r.Context(), session.UserId)
+		if err != nil {
 			return err
 		}
 		return vr.LabelIndexPage(results)
@@ -52,7 +50,7 @@ func ShowLabelIndex(t *views.Templates, db *gorm.DB) http.HandlerFunc {
 	return DefaultHandler(t, h)
 }
 
-func HandleLabelUpdate(t *views.Templates, db *gorm.DB) http.HandlerFunc {
+func HandleLabelUpdate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	handleParseError := func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Label, fe formErrors, renderer *views.Renderer) error {
 		return renderer.LabelUpdateError(session.ResId, input, fe)
 	}
@@ -60,39 +58,25 @@ func HandleLabelUpdate(t *views.Templates, db *gorm.DB) http.HandlerFunc {
 		if len(fe) > 0 {
 			return handleParseError(w, r, s, input, fe, vr)
 		}
-		ctx := r.Context()
-		var label models.Label
-		if err := db.WithContext(ctx).First(&label, s.ResId).Error; err != nil {
+		label, err := labelService.Update(r.Context(), s.UserId, s.ResId, input)
+		if err != nil {
 			return err
 		}
-		updates := map[string]any{
-			"Name":        input.Name,
-			"Description": input.Description,
-		}
-		if err := db.WithContext(ctx).Model(&label).Updates(updates).Error; err != nil {
-			return err
-		}
-		return vr.LabelUpdateOk(&label)
+		return vr.LabelUpdateOk(label)
 	}
 	return UpdateHandler(t, parseLabel, handle)
 }
 
-func HandleLabelDelete(db *gorm.DB) http.HandlerFunc {
+func HandleLabelDelete(labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, userId, resId int) error {
-		var label models.Label
-		if err := db.First(&label, resId).Error; err != nil {
-			return err
-		}
-		if err := db.Delete(&label).Error; err != nil {
-			return err
-		}
-		return nil
+		_, err := labelService.Delete(ctx, userId, resId)
+		return err
 	}
 
 	return DeleteHandler(h)
 }
 
-func HandleLabelCreate(t *views.Templates, db *gorm.DB) http.HandlerFunc {
+func HandleLabelCreate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 
 	handleParseError := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, fe formErrors, vr *views.Renderer) error {
 		w.Header().Add("HX-Retarget", "#create-form")
@@ -104,10 +88,11 @@ func HandleLabelCreate(t *views.Templates, db *gorm.DB) http.HandlerFunc {
 		if len(fe) > 0 {
 			return handleParseError(w, r, session, input, fe, vr)
 		}
-		if err := db.WithContext(r.Context()).Create(&input).Error; err != nil {
+		label, err := labelService.Create(r.Context(), session.UserId, input)
+		if err != nil {
 			return err
 		}
-		return vr.LabelCreateOk(input)
+		return vr.LabelCreateOk(label)
 	}
 	return CreateHandler(t, parseLabel, handle)
 }

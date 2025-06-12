@@ -1,106 +1,93 @@
 package handlers
 
-import (
-	"io"
-	"linn221/shop/models"
-	"mime/multipart"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
+// func HandleImageUploadSingle(db *gorm.DB, dir string) http.HandlerFunc {
+// 	var maxMemoryMB int64 = 10
+// 	formInputKey := "image"
 
-	"github.com/google/uuid"
-	"gorm.io/gorm"
-)
+// 	return ServiceErrorHandler(func(w http.ResponseWriter, r *http.Request) *ServiceError {
 
-func HandleImageUploadSingle(db *gorm.DB, dir string) http.HandlerFunc {
-	var maxMemoryMB int64 = 10
-	formInputKey := "image"
+// 		// Limit upload size to 10MB
+// 		r.ParseMultipartForm(maxMemoryMB << 20) // 10MB
 
-	return ServiceErrorHandler(func(w http.ResponseWriter, r *http.Request) *ServiceError {
+// 		file, header, err := r.FormFile(formInputKey)
+// 		if err != nil {
+// 			return clientErr("Failed to read form file")
+// 		}
+// 		if header == nil {
+// 			return clientErr("Fileheader is nil")
+// 		}
 
-		// Limit upload size to 10MB
-		r.ParseMultipartForm(maxMemoryMB << 20) // 10MB
+// 		defer file.Close()
 
-		file, header, err := r.FormFile(formInputKey)
-		if err != nil {
-			return clientErr("Failed to read form file")
-		}
-		if header == nil {
-			return clientErr("Fileheader is nil")
-		}
+// 		ext, errs := detectFileType(header)
+// 		if errs != nil {
+// 			return errs
+// 		}
 
-		defer file.Close()
+// 		// Create destination file
+// 		filename := uuid.NewString() + "." + ext
+// 		uri := filepath.Join(dir, filename)
+// 		dst, err := os.Create(uri)
+// 		if err != nil {
+// 			return systemErrString("Failed to create file", err)
+// 		}
 
-		ext, errs := detectFileType(header)
-		if errs != nil {
-			return errs
-		}
+// 		defer dst.Close()
 
-		// Create destination file
-		filename := uuid.NewString() + "." + ext
-		uri := filepath.Join(dir, filename)
-		dst, err := os.Create(uri)
-		if err != nil {
-			return systemErrString("Failed to create file", err)
-		}
+// 		if err := db.Create(&models.Image{
+// 			Url:  filename,
+// 			Size: header.Size,
+// 		}).Error; err != nil {
+// 			return systemErr(err)
+// 		}
 
-		defer dst.Close()
-
-		if err := db.Create(&models.Image{
-			Url:  filename,
-			Size: header.Size,
-		}).Error; err != nil {
-			return systemErr(err)
-		}
-
-		// Copy uploaded file to destination
-		if _, err := io.Copy(dst, file); err != nil {
-			return systemErrString("Failed to save file", err)
-		}
-		return nil
-	})
-}
+// 		// Copy uploaded file to destination
+// 		if _, err := io.Copy(dst, file); err != nil {
+// 			return systemErrString("Failed to save file", err)
+// 		}
+// 		return nil
+// 	})
+// }
 
 // detectFileType reads the first 512 bytes and detects the MIME type
-func detectFileType(FileHeader *multipart.FileHeader) (string, *ServiceError) {
-	file, err := FileHeader.Open()
+// func detectFileType(FileHeader *multipart.FileHeader) (string, *ServiceError) {
+// 	file, err := FileHeader.Open()
 
-	if err != nil {
-		return "", systemErrString("error opening file header: " + err.Error())
-	}
-	defer file.Close()
-	buf := make([]byte, 512)
-	_, err = file.Read(buf)
-	if err != nil {
-		return "", systemErrString("error reading uploaded file for detecting file type", err)
-	}
+// 	if err != nil {
+// 		return "", systemErrString("error opening file header: " + err.Error())
+// 	}
+// 	defer file.Close()
+// 	buf := make([]byte, 512)
+// 	_, err = file.Read(buf)
+// 	if err != nil {
+// 		return "", systemErrString("error reading uploaded file for detecting file type", err)
+// 	}
 
-	contentType := http.DetectContentType(buf)     // Detect MIME type
-	if !strings.HasPrefix(contentType, "image/") { // Allow only images
-		return "", clientErr("unsupported file type: " + contentType)
-	}
-	var ext string
-	switch contentType {
-	case "image/jpeg":
-		ext = "jpg"
-	case "image/png":
-		ext = "png"
-	case "image/gif":
-		ext = "gif"
-	case "image/bmp":
-		ext = "bmp"
-	case "image/webp":
-		ext = "webp"
-	case "image/svg+xml":
-		ext = "svg"
-	case "image/x-icon":
-		ext = "ico"
-	default:
-		return "", clientErr("unsupported file type: " + contentType)
-	}
-	return ext, nil
-}
+// 	contentType := http.DetectContentType(buf)     // Detect MIME type
+// 	if !strings.HasPrefix(contentType, "image/") { // Allow only images
+// 		return "", clientErr("unsupported file type: " + contentType)
+// 	}
+// 	var ext string
+// 	switch contentType {
+// 	case "image/jpeg":
+// 		ext = "jpg"
+// 	case "image/png":
+// 		ext = "png"
+// 	case "image/gif":
+// 		ext = "gif"
+// 	case "image/bmp":
+// 		ext = "bmp"
+// 	case "image/webp":
+// 		ext = "webp"
+// 	case "image/svg+xml":
+// 		ext = "svg"
+// 	case "image/x-icon":
+// 		ext = "ico"
+// 	default:
+// 		return "", clientErr("unsupported file type: " + contentType)
+// 	}
+// 	return ext, nil
+// }
 
 // func (service *ImageUploadService) UploadMultiple(r *http.Request, formInputKey string) ([]string, *ServiceError) {
 
