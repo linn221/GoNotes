@@ -6,17 +6,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        <title>Go + HTMX App</title>
-    <link rel="stylesheet" href="static/css/pico.min.css">
-    <script src="static/js/alpine.js" defer></script>
+    <title>Go + HTMX App</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/htmx.min.js" defer></script>
+    <script src="/static/js/helper.js" defer></script>
 </head>
 
 <body>
     <div class="container">
         <h3>Login</h3>
-        <form method="POST">
-
-
+        <form hx-post="/login" hx-swap="outerHTML">
             <label>Username</label>
             <input type="text" placeholder="name" name="username">
 
@@ -25,8 +26,6 @@
 
             <button type="submit">Login</button>
         </form>
-
-        <a href="/register" type="button">Register</a>
     </div>
 </body>
 
@@ -34,6 +33,7 @@
 {{ end }}
 
 {{ define "error_view" }}
+<form hx-post="/login" hx-swap="outerHTML">
     <input type="text" placeholder="name" name="username" value="{{.username.Vlu}}"
     aria-invalid="{{ .username.Invalid }}">
     {{ with .username.Err }}
@@ -47,4 +47,5 @@
     {{ end }}
 
     <button type="submit">Login</button>
+</form>
 {{ end }}

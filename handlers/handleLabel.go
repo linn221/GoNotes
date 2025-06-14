@@ -41,7 +41,7 @@ func ShowLabelEdit(t *views.Templates, labelService *models.LabelService) http.H
 
 func ShowLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
-		results, err := labelService.List(r.Context(), session.UserId)
+		results, err := labelService.ListAll(r.Context(), session.UserId)
 		if err != nil {
 			return err
 		}
@@ -51,12 +51,9 @@ func ShowLabelIndex(t *views.Templates, labelService *models.LabelService) http.
 }
 
 func HandleLabelUpdate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
-	handleParseError := func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Label, fe formErrors, renderer *views.Renderer) error {
-		return renderer.LabelUpdateError(session.ResId, input, fe)
-	}
 	handle := func(w http.ResponseWriter, r *http.Request, s *Session, input *models.Label, fe formErrors, vr *views.Renderer) error {
 		if len(fe) > 0 {
-			return handleParseError(w, r, s, input, fe, vr)
+			return vr.LabelUpdateError(s.ResId, input, fe)
 		}
 		label, err := labelService.Update(r.Context(), s.UserId, s.ResId, input)
 		if err != nil {
@@ -78,15 +75,11 @@ func HandleLabelDelete(labelService *models.LabelService) http.HandlerFunc {
 
 func HandleLabelCreate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 
-	handleParseError := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, fe formErrors, vr *views.Renderer) error {
-		w.Header().Add("HX-Retarget", "#create-form")
-		w.Header().Add("HX-Reswap", "outerHTML")
-		return vr.LabelCreateError(input, fe)
-	}
-
 	handle := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, fe formErrors, vr *views.Renderer) error {
 		if len(fe) > 0 {
-			return handleParseError(w, r, session, input, fe, vr)
+			w.Header().Add("HX-Retarget", "#create-form")
+			w.Header().Add("HX-Reswap", "outerHTML")
+			return vr.LabelCreateError(input, fe)
 		}
 		label, err := labelService.Create(r.Context(), session.UserId, input)
 		if err != nil {

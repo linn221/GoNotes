@@ -15,6 +15,7 @@ func (app *App) Serve() {
 	authMux.HandleFunc("GET /me", func(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte("hello world, you are authed"))
 	})
+	authMux.HandleFunc("POST /logout", handlers.HandleLogout(app.Cache))
 
 	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(app.Templates, app.Services.LabelService))
 	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(app.Templates))
@@ -27,7 +28,7 @@ func (app *App) Serve() {
 
 	mainMux := http.NewServeMux()
 	// public routes
-	mainMux.HandleFunc("/login", handlers.HandleLogin(app.Templates, app.DB, app.Cache))
+	mainMux.HandleFunc("/login", handlers.HandleLogin(app.Templates, app.Services.UserService, app.Cache))
 
 	// mainMux.Handle("/api/", http.StripPrefix("/api", middlewares.Auth(authMux)))
 	// file upload

@@ -10,7 +10,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "/home/linn/Downloads/Telegram Desktop/shop"
+            "program": "/home/linn/taskman/cmd/web"
         }
     ]
 }

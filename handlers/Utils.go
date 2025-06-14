@@ -32,3 +32,7 @@ func finalErrHandle(w http.ResponseWriter, err error) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
+
+func htmxRedirect(w http.ResponseWriter, url string) {
+	w.Header().Set("HX-Redirect", url)
+}

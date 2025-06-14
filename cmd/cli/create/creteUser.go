@@ -1,9 +1,10 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"linn221/shop/config"
 	"linn221/shop/models"
-	"linn221/shop/utils"
 	"log"
 )
 
@@ -14,10 +15,10 @@ func main() {
 		Username: "linn",
 		Password: "secret44",
 	}
-	h, err := utils.HashPassword(user.Password)
+	userService := models.NewUserService(db)
+	_, err := userService.Register(context.Background(), &user)
 	if err != nil {
-		log.Fatal(err.Error())
+		log.Fatal(err)
 	}
-	user.Password = string(h)
-	db.Create(&user)
+	fmt.Println("user created successfully")
 }

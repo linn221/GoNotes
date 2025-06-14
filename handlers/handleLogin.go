@@ -6,14 +6,12 @@ import (
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
 	"linn221/shop/services"
-	"linn221/shop/utils"
 	"linn221/shop/views"
 
 	"net/http"
 	"time"
 
 	"github.com/google/uuid"
-	"gorm.io/gorm"
 )
 
 func parseLoginForm(r *http.Request) (*models.User, map[string]error) {
@@ -28,7 +26,7 @@ func parseLoginForm(r *http.Request) (*models.User, map[string]error) {
 }
 
 func HandleLogin(vr *views.Templates,
-	db *gorm.DB,
+	userService *models.UserService,
 	cache services.CacheService,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -47,22 +45,12 @@ func HandleLogin(vr *views.Templates,
 				return
 			}
 
-			var user models.User
-			if err := db.Where("username = ?", input.Username).First(&user).Error; err != nil {
+			user, err := userService.Login(r.Context(), input.Username, input.Password)
+			if err != nil {
 				finalErrHandle(w,
 					vr.LoginFormWithErrors(w, input, map[string]error{
 						"username": errors.New("invalid username/password"),
 						"password": errors.New("invalid username/password")}),
-				)
-				return
-			}
-
-			if err := utils.ComparePassword(user.Password, input.Password); err != nil {
-				finalErrHandle(w,
-					vr.LoginFormWithErrors(w, input, map[string]error{
-						"username": errors.New("invalid username/password"),
-						"password": errors.New("invalid username/password"),
-					}),
 				)
 				return
 			}
@@ -81,10 +69,7 @@ func HandleLogin(vr *views.Templates,
 				Path:   "/", Domain: "",
 				Secure: false, HttpOnly: true,
 			})
-			// w.Header().Set("HX-Redirect", "/")
-			// w.WriteHeader(http.StatusOK)
-			// utils.HxRedirect(w, "/users/labels")
-			http.Redirect(w, r, "/labels", http.StatusTemporaryRedirect)
+			htmxRedirect(w, "/labels")
 		} else {
 			finalErrHandle(w, errors.New("invalid http method"))
 		}
@@ -100,7 +85,7 @@ func newSessionToken(cache services.CacheService, userId int) (string, error) {
 	return tokenString, nil
 }
 
-func HandleLogout(cache services.CacheService, vr *views.Templates) http.HandlerFunc {
+func HandleLogout(cache services.CacheService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookies, err := r.Cookie("token")
 		if err != nil {
@@ -112,13 +97,12 @@ func HandleLogout(cache services.CacheService, vr *views.Templates) http.Handler
 			return
 		}
 		token := cookies.Value
-		//2d write helper for removing token from redis
 		if err := cache.RemoveKey(fmt.Sprintf("Token:%s", token)); err != nil {
 			finalErrHandle(w, err)
 			return
 		}
 		removeTokenCookies(w)
-		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+		htmxRedirect(w, "/login")
 	}
 }
 

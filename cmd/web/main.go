@@ -16,7 +16,7 @@ func main() {
 	port := config.GetPortNo()
 	services := models.NewServices(db, redisCache)
 	templates := views.NewEngine(config.GetBaseDir())
-	assetDir := filepath.Join(config.GetBaseDir(), "../../files")
+	assetDir := filepath.Join(config.GetBaseDir(), "../../files/static")
 
 	// // rate limiting crud endpoints by userId
 	// resourceRateLimit := middlewares.NewRateLimiter(redisCache.GetClient(), time.Minute*5, 2000, "r", func(r *http.Request) (string, error) {

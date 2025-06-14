@@ -28,7 +28,7 @@
         <td>{{.Name}}</td>
         <td>
             <button hx-get="/labels/{{.Id}}/edit" hx-target="#edit-modal">Edit</button>
-            <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}" hx-swap="delete">Delete</button>
+            <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}" hx-swap="delete" hx-confirm="Are you sure?">Delete</button>
             <button>Details</button>
         </td>
     </tr>

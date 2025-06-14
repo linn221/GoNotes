@@ -15,11 +15,13 @@ type CrudServices struct {
 	// ItemListService     services.Lister[ItemResource]
 	NoteService  *NoteService
 	LabelService *LabelService
+	UserService  *UserService
 }
 
 func NewServices(db *gorm.DB, cache services.CacheService) *CrudServices {
 	return &CrudServices{
 		NoteService:  &NoteService{db: db},
 		LabelService: &LabelService{db: db},
+		UserService:  &UserService{db: db},
 	}
 }

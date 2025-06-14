@@ -9,7 +9,8 @@ import (
 func migrate(db *gorm.DB) {
 
 	err := db.AutoMigrate(&models.Shop{}, &models.User{}, &models.Image{},
-		&models.Label{})
+		&models.Label{},
+		&models.Note{})
 	if err != nil {
 		panic("Error migrating: " + err.Error())
 	}
