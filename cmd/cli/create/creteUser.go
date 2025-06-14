@@ -12,7 +12,8 @@ func main() {
 	db := config.ConnectDB()
 
 	user := models.User{
-		Username: "linn",
+		Username: "adam",
+		Email:    "admin@mail.com",
 		Password: "secret44",
 	}
 	userService := models.NewUserService(db)

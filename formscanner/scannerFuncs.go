@@ -43,7 +43,7 @@ var Date = func(r *http.Request, name string) (result *time.Time, omitted bool, 
 		omitted = true
 		return
 	}
-	t, err := time.Parse("2006-01-02", v)
+	t, err := time.Parse(MyDateFormat, v)
 	if err != nil {
 		return
 	}
@@ -51,16 +51,18 @@ var Date = func(r *http.Request, name string) (result *time.Time, omitted bool, 
 	return
 }
 
-var DateRequired = func(r *http.Request, name string) (result time.Time, omitted bool, err error) {
+var MyDateFormat = "2006-01-02"
+var DateRequired = func(r *http.Request, name string) (result *time.Time, omitted bool, err error) {
 	v := r.PostFormValue(name)
 	if v == "" {
 		err = fmt.Errorf("%s is required", name)
 		return
 	}
-	result, err = time.Parse("2006-01-02", v)
+	t, err := time.Parse(MyDateFormat, v)
 	if err != nil {
 		return
 	}
+	result = &t
 	return
 }
 

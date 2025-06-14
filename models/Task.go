@@ -47,7 +47,7 @@ type Task struct {
 // 	}
 // }
 
-// func (t *Task) Validate(db *gorm.DB, id int, userId int) map[string]error {
+// func (t *Task) Validate(db *gorm.DB, id int, userId int) services.FormErrors {
 // 	m := validate.ValidateInBatch(db,
 // 		validate.NewExistsRule("labels", t.LabelId, "label not found", validate.NewFilter("user_id = ?", userId), "label_id"))
 // 	if t.Deadline != nil && t.Deadline.Before(t.CreateDate) {

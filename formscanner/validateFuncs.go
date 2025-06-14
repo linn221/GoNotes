@@ -2,7 +2,9 @@ package formscanner
 
 import (
 	"cmp"
+	"errors"
 	"fmt"
+	"time"
 )
 
 type ValidateFunc[T any] func(T) error
@@ -49,4 +51,15 @@ func Max(max int) ValidateFunc[string] {
 		}
 		return fmt.Errorf("string length cannot be greater than %d", max)
 	}
+}
+
+func InFuture(t *time.Time) error {
+	if t == nil {
+		return nil
+	}
+	if t.After(time.Now()) {
+		return nil
+	}
+
+	return errors.New("time must be in the future")
 }

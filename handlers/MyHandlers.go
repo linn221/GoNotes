@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"linn221/shop/myctx"
+	"linn221/shop/services"
 	"linn221/shop/views"
 	"net/http"
 	"strconv"
@@ -110,8 +111,8 @@ func DeleteHandler(handle DeleteHandlerFunc) http.HandlerFunc {
 }
 
 func CreateHandler[T any](t *views.Templates,
-	parseInput func(*http.Request) (*T, formErrors),
-	handle func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *T, fe formErrors, vr *views.Renderer) error,
+	parseInput func(*http.Request) (*T, services.FormErrors),
+	handle func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *T, fe services.FormErrors, vr *views.Renderer) error,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
@@ -137,8 +138,8 @@ func CreateHandler[T any](t *views.Templates,
 }
 
 func UpdateHandler[T any](t *views.Templates,
-	parseInput func(r *http.Request) (*T, formErrors),
-	handle func(w http.ResponseWriter, r *http.Request, session *Session, input *T, fe formErrors, renderer *views.Renderer) error,
+	parseInput func(r *http.Request) (*T, services.FormErrors),
+	handle func(w http.ResponseWriter, r *http.Request, session *Session, input *T, fe services.FormErrors, renderer *views.Renderer) error,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()

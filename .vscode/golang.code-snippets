@@ -56,6 +56,14 @@
 			"}",
 		],
 	},
+	"Error Handleee": {
+		"prefix": "rnill",
+		"body": [
+			"if err != nil {",
+			"\treturn err",
+			"}",
+		],
+	},
 	"New Snippet": {
 		"prefix": "snip",
 		"body": [

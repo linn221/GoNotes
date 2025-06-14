@@ -2,14 +2,15 @@ package views
 
 import (
 	"linn221/shop/models"
+	"linn221/shop/services"
 	"net/http"
 )
 
-func (r *Templates) LoginFormWithErrors(w http.ResponseWriter, input *models.User, errMap map[string]error) error {
+func (r *Templates) LoginFormWithErrors(w http.ResponseWriter, input *models.User, errMap services.FormErrors) error {
 
-	data := map[string]FormError{
-		"username": NewFormError(input.Username, errMap["username"]),
-		"password": NewFormError(input.Password, errMap["password"]),
+	data := map[string]FormInput{
+		"username": NewFormInput(input.Username, errMap["username"]),
+		"password": NewFormInput(input.Password, errMap["password"]),
 	}
 	return r.loginTemplate.ExecuteTemplate(w, "error_view", data)
 }

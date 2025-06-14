@@ -22,3 +22,5 @@ type CacheService interface {
 type HasIsActiveStatus interface {
 	GetIsActive() bool
 }
+
+type FormErrors map[string]error

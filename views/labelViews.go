@@ -2,17 +2,18 @@ package views
 
 import (
 	"linn221/shop/models"
+	"linn221/shop/services"
 )
 
 func (r *Renderer) LabelCreateForm() error {
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_form", nil)
 }
 
-func (r *Renderer) LabelCreateError(input *models.Label, errmap map[string]error) error {
+func (r *Renderer) LabelCreateError(input *models.Label, errmap services.FormErrors) error {
 
-	m := map[string]FormError{
-		"name":        NewFormError(input.Name, errmap["name"]),
-		"description": NewFormError(input.Description, errmap["description"]),
+	m := map[string]FormInput{
+		"name":        NewFormInput(input.Name, errmap["name"]),
+		"description": NewFormInput(input.Description, errmap["description"]),
 	}
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_form2", m)
 }
@@ -36,12 +37,12 @@ func (r *Renderer) LabelEditForm(resId int, input *models.Label) error {
 	})
 }
 
-func (r *Renderer) LabelUpdateError(resId int, input *models.Label, errMap map[string]error) error {
+func (r *Renderer) LabelUpdateError(resId int, input *models.Label, errMap services.FormErrors) error {
 
 	m := map[string]any{
 		"Id":          resId,
-		"name":        NewFormError(input.Name, errMap["name"]),
-		"description": NewFormError(input.Description, errMap["description"]),
+		"name":        NewFormInput(input.Name, errMap["name"]),
+		"description": NewFormInput(input.Description, errMap["description"]),
 	}
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "edit_form2", m)
 }

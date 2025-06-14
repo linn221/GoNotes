@@ -14,7 +14,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func parseLoginForm(r *http.Request) (*models.User, map[string]error) {
+func parseLoginForm(r *http.Request) (*models.User, services.FormErrors) {
 	var input models.User
 	scans := [...]ScannerFunc{
 		newScannerFunc(r, "username", &input.Username, formscanner.StringRequired, formscanner.MinMax(4, 20)),
@@ -48,7 +48,7 @@ func HandleLogin(vr *views.Templates,
 			user, err := userService.Login(r.Context(), input.Username, input.Password)
 			if err != nil {
 				finalErrHandle(w,
-					vr.LoginFormWithErrors(w, input, map[string]error{
+					vr.LoginFormWithErrors(w, input, services.FormErrors{
 						"username": errors.New("invalid username/password"),
 						"password": errors.New("invalid username/password")}),
 				)

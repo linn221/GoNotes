@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"linn221/shop/formscanner"
+	"linn221/shop/services"
 	"net/http"
 )
 
@@ -17,8 +18,8 @@ func newScannerFunc[T any](r *http.Request, name string, ptr *T, scanFunc func(*
 	}
 }
 
-func runScanners(xs []ScannerFunc) formErrors {
-	m := make(map[string]error)
+func runScanners(xs []ScannerFunc) services.FormErrors {
+	m := make(services.FormErrors)
 	for _, x := range xs {
 		if inputName, err := x(); err != nil {
 			m[inputName] = err

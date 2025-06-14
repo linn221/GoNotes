@@ -2,7 +2,6 @@ package models
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"gorm.io/gorm"
@@ -16,15 +15,14 @@ type Note struct {
 	LabelId      int    `gorm:"index;not null"`
 	ParentNoteId int    `gorm:"index"`
 	Label        Label
-	Reminder     time.Time `gorm:"index"`
+	RemindDate   *time.Time `gorm:"index;default:null"`
 	HasUserId
+	CreatedAt time.Time
+	UpdatedAt time.Time
 }
 
 func (input *Note) validate(db *gorm.DB, userId int, id int) error {
 
-	if input.Reminder.Before(time.Now()) {
-		return errors.New("remind date should be in the future")
-	}
 	userFilter := NewFilter("user_id = ?", userId)
 	return Validate(db, NewExistsRule("labels", input.LabelId, "label not found", userFilter),
 		NewUniqueRule("notes", "title", input.Title, id, "duplicate title", userFilter),
@@ -39,15 +37,17 @@ type NoteResource struct {
 	LabelId      int
 	LabelName    string
 	ParentNoteId int
-	Reminder     string
+	RemindDate   MyDate
+	CreatedAt    MyDateTime
+	UpdatedAt    MyDateTime
 }
 
 type NoteService struct {
 	db *gorm.DB
 }
 
-func (s *NoteService) fetch(ctx context.Context, userId int, id int) (*Note, error) {
-	return first[Note](s.db.WithContext(ctx), userId, id)
+func (s *NoteService) fetch(ctx context.Context, userId int, id int, preloads ...string) (*Note, error) {
+	return first[Note](s.db.WithContext(ctx), userId, id, preloads...)
 }
 
 func (s *NoteService) Create(ctx context.Context, userId int, input *Note) (*Note, error) {
@@ -55,6 +55,8 @@ func (s *NoteService) Create(ctx context.Context, userId int, input *Note) (*Not
 	if err := input.validate(s.db.WithContext(ctx), userId, 0); err != nil {
 		return nil, err
 	}
+	input.UserId = userId
+
 	err := s.db.WithContext(ctx).Create(&input).Error
 	return input, err
 }
@@ -73,7 +75,7 @@ func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Not
 		"Description": input.Description,
 		"Body":        input.Body,
 		"LabelId":     input.LabelId,
-		"Reminder":    input.Reminder,
+		"RemindDate":  input.RemindDate,
 	}
 	if err := s.db.WithContext(ctx).Model(&note).Updates(updates).Error; err != nil {
 		return nil, err
@@ -81,8 +83,8 @@ func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Not
 	return note, nil
 }
 
-func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body string) (*Note, error) {
-	note, err := s.fetch(ctx, userId, id)
+func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body string) (*NoteResource, error) {
+	note, err := s.fetch(ctx, userId, id, "Label")
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +92,7 @@ func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body s
 	if err != nil {
 		return nil, err
 	}
-	return note, nil
+	return s.ConvertToResource(note), nil
 }
 
 func (s *NoteService) Delete(ctx context.Context, userId int, id int) (*Note, error) {
@@ -104,7 +106,11 @@ func (s *NoteService) Delete(ctx context.Context, userId int, id int) (*Note, er
 	return note, nil
 }
 
-func (s *NoteService) convertToResoruce(note *Note) *NoteResource {
+func (s *NoteService) ConvertToResource(note *Note) *NoteResource {
+	var remindDate MyDate
+	if note.RemindDate != nil {
+		remindDate = MyDate{*note.RemindDate}
+	}
 	res := NoteResource{
 		Id:          note.Id,
 		Title:       note.Title,
@@ -112,7 +118,9 @@ func (s *NoteService) convertToResoruce(note *Note) *NoteResource {
 		Body:        note.Body,
 		LabelId:     note.LabelId,
 		LabelName:   note.Label.Name,
-		Reminder:    note.Reminder.Format(time.DateOnly),
+		RemindDate:  remindDate,
+		CreatedAt:   MyDateTime{note.CreatedAt},
+		UpdatedAt:   MyDateTime{note.UpdatedAt},
 	}
 	return &res
 }
@@ -123,7 +131,7 @@ func (s *NoteService) Get(ctx context.Context, userId int, id int) (*NoteResourc
 	if err != nil {
 		return nil, err
 	}
-	res := s.convertToResoruce(note)
+	res := s.ConvertToResource(note)
 	return res, nil
 }
 
@@ -134,7 +142,7 @@ func (s *NoteService) ListNotes(ctx context.Context, userId int) ([]*NoteResourc
 	}
 	resCollection := make([]*NoteResource, 0, len(notes))
 	for _, n := range notes {
-		resCollection = append(resCollection, s.convertToResoruce(&n))
+		resCollection = append(resCollection, s.ConvertToResource(&n))
 	}
 
 	return resCollection, nil
