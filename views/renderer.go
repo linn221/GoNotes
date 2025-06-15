@@ -16,14 +16,15 @@ import (
 //	)
 
 type Templates struct {
-	loginTemplate *template.Template
-	// registerTemplate *template.Template
-	indexTemplate *template.Template
+	loginTemplate    *template.Template
+	registerTemplate *template.Template
+	indexTemplate    *template.Template
 
-	labelTemplate      *template.Template
-	noteTemplate       *template.Template
-	noteCreateTemplate *template.Template
-	noteEditTemplate   *template.Template
+	labelTemplate          *template.Template
+	noteTemplate           *template.Template
+	noteCreateTemplate     *template.Template
+	noteEditTemplate       *template.Template
+	changePasswordTemplate *template.Template
 
 	// internalErrorTemplate  *template.Template //2d
 	// notFoundTemplate       *template.Template //2d
@@ -49,11 +50,14 @@ func NewEngine(baseDir string) *Templates {
 	return &Templates{
 		loginTemplate: template.Must(
 			template.New("root").ParseFiles(filepath.Join(templateDir, "login.gotmpl"))),
-		indexTemplate:      parsePage("index.gotmpl"),
-		labelTemplate:      parsePage("label.gotmpl"),
-		noteTemplate:       parsePage("note.gotmpl"),
-		noteCreateTemplate: parsePage("note-create.gotmpl"),
-		noteEditTemplate:   parsePage("note-edit.gotmpl"),
+		registerTemplate: template.Must(
+			template.New("root").ParseFiles(filepath.Join(templateDir, "register.gotmpl"))),
+		changePasswordTemplate: parsePage("change-password.gotmpl"),
+		indexTemplate:          parsePage("index.gotmpl"),
+		labelTemplate:          parsePage("label.gotmpl"),
+		noteTemplate:           parsePage("note.gotmpl"),
+		noteCreateTemplate:     parsePage("note-create.gotmpl"),
+		noteEditTemplate:       parsePage("note-edit.gotmpl"),
 	}
 }
 

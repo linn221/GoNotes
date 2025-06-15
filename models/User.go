@@ -68,3 +68,27 @@ func (s *UserService) Login(ctx context.Context, username string, password strin
 
 	return &user, nil
 }
+
+func (s *UserService) ChangePassword(ctx context.Context, userId int, oldPassword string, newPassword string) (*User, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var user User
+	if err := s.db.WithContext(ctx).First(&user, userId).Error; err != nil {
+		return nil, err
+	}
+
+	err := utils.ComparePassword(user.Password, oldPassword)
+	if err != nil {
+		return nil, err
+	}
+	h, err := utils.HashPassword(newPassword)
+	if err != nil {
+		return nil, err
+	}
+	if err := s.db.WithContext(ctx).Model(&user).UpdateColumn("password", string(h)).Error; err != nil {
+		return nil, err
+	}
+
+	return &user, nil
+}

@@ -1,13 +1,22 @@
 {{ define "nav" }}
 <nav class="navbar">
     <ul>
-        <li><a href="/tasks" hx-boost="true">Tasks</a></li>
-        <li><a href="/labels" hx-boost="true">Labels</a></li>
         <li><a href="/notes" hx-boost="true">Notes</a></li>
+        <li><a href="/labels" hx-boost="true">Labels</a></li>
     </ul>
     <ul>
         <li>
-        <button hx-post="/logout">Logout</button>
+        <details role="list">
+        <summary aria-haspopup="listbox">Acc</summary>
+        <ul role="listbox">
+            <li>
+                <button hx-post="/logout">Logout</button>
+            </li>
+            <li>
+                <a href="/change-password" hx-boost="true" role="button">Change Password</a>
+            </li>
+        </ul>
+        </details>
         </li>
     </ul>
 </nav>

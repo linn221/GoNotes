@@ -1,0 +1,66 @@
+{{ define "root" }}
+
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Go + HTMX App</title>
+    <link rel="stylesheet" href="/static/css/pico.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/htmx.min.js" defer></script>
+    <script src="/static/js/helper.js" defer></script>
+</head>
+
+<body>
+    <div class="container">
+        <div id="alert-container"></div>
+        <h3>Register</h3>
+        <form hx-post="/register" hx-swap="outerHTML">
+            <label>Username</label>
+            <input type="text" name="username">
+
+            <label>Email</label>
+            <input type="text" name="email">
+
+            <label>Password</label>
+            <input type="password" name="password">
+
+            <button type="submit">Register</button>
+        </form>
+        <a href="/login" hx-boost="true" role="button">Login</a>
+    </div>
+</body>
+
+<script>
+</script>
+</html>
+{{ end }}
+
+{{ define "error_view"}}
+<form hx-post="/register" hx-swap="outerHTML">
+    <label>Username</label>
+    <input type="text" name="username"
+    value="{{.username.Vlu}}"
+    aria-invalid="{{.username.Invalid}}">
+    {{with .username.Err}}
+        <small>{{.}}</small>
+    {{end}}
+
+    <label>Email</label>
+    <input type="text" name="email" value="{{.email.Vlu}}" aria-invalid="{{.email.Invalid}}">
+    {{with .email.Err}}
+        <small>{{.}}</small>
+    {{end}}
+
+    <label>Password</label>
+    <input type="password" name="password" value="{{.password.Vlu}}" aria-invalid="{{.password.Invalid}}">
+    {{with .password.Err}}
+        <small>{{.}}</small>
+    {{end}}
+
+    <button type="submit">Register</button>
+</form>
+{{end}}

@@ -87,23 +87,29 @@ func newSessionToken(cache services.CacheService, userId int) (string, error) {
 
 func HandleLogout(cache services.CacheService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		cookies, err := r.Cookie("token")
-		if err != nil {
-			if err == http.ErrNoCookie {
-				http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-				return
-			}
-			finalErrHandle(w, err)
-			return
-		}
-		token := cookies.Value
-		if err := cache.RemoveKey(fmt.Sprintf("Token:%s", token)); err != nil {
-			finalErrHandle(w, err)
-			return
-		}
-		removeTokenCookies(w)
-		htmxRedirect(w, "/login")
+		logout(cache, w, r)
 	}
+}
+
+// handle logout
+func logout(cache services.CacheService, w http.ResponseWriter, r *http.Request) {
+
+	cookies, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			return
+		}
+		finalErrHandle(w, err)
+		return
+	}
+	token := cookies.Value
+	if err := cache.RemoveKey(fmt.Sprintf("Token:%s", token)); err != nil {
+		finalErrHandle(w, err)
+		return
+	}
+	removeTokenCookies(w)
+	htmxRedirect(w, "/login")
 }
 
 func removeTokenCookies(w http.ResponseWriter) {

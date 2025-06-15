@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
 	"linn221/shop/services"
@@ -72,6 +73,22 @@ func HandleLabelDelete(labelService *models.LabelService) http.HandlerFunc {
 	}
 
 	return DeleteHandler(h)
+}
+
+func HandleLabelToggleActive(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
+	return ResourceHandler(t, func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error {
+		isActiveQuery := r.URL.Query().Get("status")
+		if isActiveQuery == "" {
+			return errors.New("please set an active status")
+		}
+		isActive := isActiveQuery == "true"
+
+		label, err := labelService.ToggleActive(ctx, session.UserId, session.ResId, isActive)
+		if err != nil {
+			return err
+		}
+		return vr.LabelToggleButton(label)
+	})
 }
 
 func HandleLabelCreate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {

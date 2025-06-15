@@ -19,11 +19,16 @@ func (app *App) Serve() {
 
 	t := app.Templates
 	myServices := app.Services
+	authMux.HandleFunc("/change-password", handlers.HandleChangePassword(t, myServices.UserService, app.Cache))
 
 	//labels
+	authMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		t.Index(w)
+	})
 	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(t, myServices.LabelService))
 	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(t))
 	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(t, myServices.LabelService))
+	authMux.HandleFunc("POST /labels/{id}/toggle", handlers.HandleLabelToggleActive(t, myServices.LabelService))
 	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(t, myServices.LabelService))
 	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(t, myServices.LabelService))
 	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(myServices.LabelService))
@@ -39,7 +44,9 @@ func (app *App) Serve() {
 
 	mainMux := http.NewServeMux()
 	// public routes
-	mainMux.HandleFunc("/login", handlers.HandleLogin(t, myServices.UserService, app.Cache))
+
+	mainMux.Handle("/login", middlewares.RedirectIfAuthenticated(handlers.HandleLogin(t, myServices.UserService, app.Cache)))
+	mainMux.Handle("/register", middlewares.RedirectIfAuthenticated(handlers.HandleRegister(t, myServices.UserService)))
 
 	// mainMux.Handle("/api/", http.StripPrefix("/api", middlewares.Auth(authMux)))
 	// file upload

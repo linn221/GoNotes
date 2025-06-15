@@ -31,7 +31,7 @@
             <div x-show="edit">
                 <form hx-patch="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
                     <label><strong>Edit Body</strong></label>
-                    <textarea name="body">{{.Body}}</textarea>
+                    <textarea name="body" id="note-body-{{.Id}}" oninput="autoResize(this)" onfocus="autoResize(this)">{{.Body}}</textarea>
                     <div>
                         <button type="submit" class="secondary">Submit</button>
                         <button type="button" @click="edit = false" class="contrast">Cancel</button>
@@ -42,7 +42,7 @@
             <div x-show="!edit">
                 <button @click="edit = true" class="secondary outline">Edit Inline</button>
                 <div>
-                    <p>{{.Body}}</p>
+                    <pre>{{.Body}}</pre>
                 </div>
             </div>
         </div>

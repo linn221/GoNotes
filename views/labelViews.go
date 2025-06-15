@@ -47,6 +47,10 @@ func (r *Renderer) LabelUpdateError(resId int, input *models.Label, errMap servi
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "edit_form2", m)
 }
 
+func (r *Renderer) LabelToggleButton(label *models.Label) error {
+	return r.templates.labelTemplate.ExecuteTemplate(r.w, "toggle_button", label)
+}
+
 func (r *Renderer) LabelIndexPage(labels []models.Label) error {
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "root", map[string]any{
 		"ResList": labels,

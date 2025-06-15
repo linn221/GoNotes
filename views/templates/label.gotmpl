@@ -5,7 +5,6 @@
 
     <table>
         <thead>
-            <th>Id</th>
             <th>Name</th>
             <th>Actions</th>
         </thead>
@@ -28,15 +27,41 @@
 
 {{ define "row" }}
     <tr id="row-{{.Id}}">
-        <td>{{.Id}}</td>
-        <td>{{.Name}}</td>
+        <td>
+        {{if .Description}}
+        <details>
+            <summary>{{.Name}}</summary>
+            {{.Description}}
+        </details>
+        {{else}}
+        {{.Name}}
+        {{end}}
+        </td>
         <td>
             <button hx-get="/labels/{{.Id}}/edit" hx-target="#edit-view"
             >Edit</button>
-            <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}" hx-swap="delete" hx-confirm="Are you sure?">Delete</button>
-            <button>Details</button>
+            {{template "toggle_button" .}}
+            <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}"
+            class="contrast"
+            hx-swap="delete" hx-confirm="Are you sure?">Delete</button>
         </td>
     </tr>
+{{end}}
+
+{{define "toggle_button" }}
+{{if .IsActive}}
+    <button
+    id="toggle-button-{{.Id}}"
+    hx-post="/labels/{{.Id}}/toggle?status=false"
+    class="secondary"
+    hx-swap="outerHTML">Toggle INactive</button>
+{{else}}
+    <button
+    id="toggle-button-{{.Id}}"
+    hx-post="/labels/{{.Id}}/toggle?status=true"
+    class="secondary"
+    hx-swap="outerHTML"><u>Toggle Active</u></button>
+{{end}}
 {{end}}
 
 {{ define "create_form" }}
