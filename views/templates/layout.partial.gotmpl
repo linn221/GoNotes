@@ -6,7 +6,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Go + HTMX App</title>
+    {{with .PageTitle}}
+      <title>{{.}}</title>
+    {{else}}
+      <title>Go + HTMX App</title>
+    {{end}}
     <link rel="stylesheet" href="/static/css/pico.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="/static/js/alpine.js" defer></script>
@@ -15,7 +19,7 @@
     <script type="module" src="https://md-block.verou.me/md-block.js"></script>
 </head>
 
-<body>
+<body hx-boost="true">
     <div class="container">
         <div id="alert-container"></div>
         {{ template "nav" }}

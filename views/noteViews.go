@@ -7,9 +7,10 @@ import (
 	"linn221/shop/services"
 )
 
-func (r *Renderer) NoteCreateForm(userId int, labels []models.Label) error {
+func (r *Renderer) NoteCreateForm(userId int, labels []models.Label, labelId int) error {
 	return r.templates.noteCreateTemplate.Execute(r.w, map[string]any{
-		"Labels": labels,
+		"Labels":  labels,
+		"LabelId": labelId,
 	})
 }
 
@@ -58,6 +59,7 @@ func (r *Renderer) NoteEditError(userId int, resId int, input *models.Note, errm
 
 func (r *Renderer) NoteIndexPage(notes []*models.NoteResource) error {
 	return r.templates.noteTemplate.Execute(r.w, map[string]any{
-		"ResList": notes,
+		"ResList":   notes,
+		"PageTitle": "Notes",
 	})
 }

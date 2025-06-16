@@ -75,7 +75,9 @@ func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Not
 		"Description": input.Description,
 		"Body":        input.Body,
 		"LabelId":     input.LabelId,
-		"RemindDate":  input.RemindDate,
+	}
+	if input.RemindDate.IsZero() {
+		updates["RemindDate"] = input.RemindDate
 	}
 	if err := s.db.WithContext(ctx).Model(&note).Updates(updates).Error; err != nil {
 		return nil, err
@@ -89,6 +91,22 @@ func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body s
 		return nil, err
 	}
 	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("body", body).Error
+	if err != nil {
+		return nil, err
+	}
+	return s.ConvertToResource(note), nil
+}
+
+func (s *NoteService) UpdateLabel(ctx context.Context, userId int, id int, labelId int) (*NoteResource, error) {
+	note, err := s.fetch(ctx, userId, id, "Label")
+	if err != nil {
+		return nil, err
+	}
+	if err := Validate(s.db.WithContext(ctx), NewExistsRule("labels", labelId, "label not found", NewFilter("user_id = ?", userId))); err != nil {
+		return nil, err
+	}
+
+	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("label_id", labelId).Error
 	if err != nil {
 		return nil, err
 	}
@@ -133,8 +151,32 @@ func (s *NoteService) Get(ctx context.Context, userId int, id int) (*NoteResourc
 	return res, nil
 }
 
-func (s *NoteService) ListNotes(ctx context.Context, userId int) ([]*NoteResource, error) {
+type NoteSearchParam struct {
+	LabelId int
+}
+
+func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, error) {
 	notes, err := find[Note](s.db.WithContext(ctx), userId, "Label")
+	if err != nil {
+		return nil, err
+	}
+	return notes, nil
+}
+
+func (s *NoteService) ListNotes(ctx context.Context, userId int, param *NoteSearchParam) ([]*NoteResource, error) {
+	var notes []Note
+	var err error
+	if param != nil {
+		dbCtx := s.db.WithContext(ctx).Preload("Label").Where("user_id = ?", userId)
+		if param.LabelId > 0 {
+			dbCtx.Where("label_id = ?", param.LabelId)
+		}
+
+		err = dbCtx.Find(&notes).Error
+	} else {
+		notes, err = s.listAllNotes(ctx, userId)
+	}
+
 	if err != nil {
 		return nil, err
 	}

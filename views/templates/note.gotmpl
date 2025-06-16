@@ -33,7 +33,8 @@
                     <label><strong>Edit Body</strong></label>
                     <textarea name="body" id="note-body-{{.Id}}"
                         oninput="autoResize(this)"
-                       style="height: auto;">{{.Body}}</textarea>
+                        onfocus="autoResize(this)"
+                       >{{.Body}}</textarea>
                     <div>
                         <button type="submit" class="secondary">Submit</button>
                         <button type="button" @click="edit = false" class="contrast">Cancel</button>
@@ -44,9 +45,9 @@
             <div x-show="!edit">
                 <button @click="edit = true;"
                     class="secondary outline">Edit Inline</button>
-                <div id="pre-{{.Id}}" style="white-space: pre;">
+                    <md-block>
                     {{.Body}}
-                </div>
+                    </md-block>
             </div>
         </div>
 

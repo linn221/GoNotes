@@ -30,14 +30,15 @@
         <td>
         {{if .Description}}
         <details>
-            <summary>{{.Name}}</summary>
+            <summary>{{template "label_name" .}}</summary>
             {{.Description}}
         </details>
         {{else}}
-        {{.Name}}
+            {{template "label_name" .}}
         {{end}}
         </td>
         <td>
+            <a href="/notes/new?label_id={{.Id}}" role="button">New Note</a>
             <button hx-get="/labels/{{.Id}}/edit" hx-target="#edit-view"
             >Edit</button>
             {{template "toggle_button" .}}
@@ -46,6 +47,10 @@
             hx-swap="delete" hx-confirm="Are you sure?">Delete</button>
         </td>
     </tr>
+{{end}}
+
+{{define "label_name"}}
+    <a href="/notes?label_id={{.Id}}">{{.Name}}</a>
 {{end}}
 
 {{define "toggle_button" }}

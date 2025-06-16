@@ -7,6 +7,7 @@ import (
 	"linn221/shop/services"
 	"linn221/shop/views"
 	"net/http"
+	"strconv"
 )
 
 func parseNote(r *http.Request) (*models.Note, services.FormErrors) {
@@ -30,8 +31,23 @@ func ShowNoteCreate(t *views.Templates, labelService *models.LabelService) http.
 		if err != nil {
 			return err
 		}
-		return vr.NoteCreateForm(session.UserId, labels)
+		labelId, ok := getQueryInt(r, "label_id")
+		if !ok {
+			labelId = labels[0].Id
+		}
+		return vr.NoteCreateForm(session.UserId, labels, labelId)
 	})
+}
+
+func getQueryInt(r *http.Request, key string) (int, bool) {
+	s := r.URL.Query().Get(key)
+	if s != "" {
+		i, _ := strconv.Atoi(s)
+		if i > 0 {
+			return i, true
+		}
+	}
+	return 0, false
 }
 
 func ShowNoteEdit(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
@@ -50,8 +66,18 @@ func ShowNoteEdit(t *views.Templates, noteService *models.NoteService, labelServ
 }
 
 func ShowNoteIndex(t *views.Templates, noteService *models.NoteService) http.HandlerFunc {
+	parseSearchParam := func(r *http.Request) *models.NoteSearchParam {
+		var searchParam *models.NoteSearchParam
+		labelId, ok := getQueryInt(r, "label_id")
+		if ok {
+			searchParam = &models.NoteSearchParam{LabelId: labelId}
+		}
+		return searchParam
+	}
 	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
-		notes, err := noteService.ListNotes(ctx, session.UserId)
+		//parse search param
+		searchParam := parseSearchParam(r)
+		notes, err := noteService.ListNotes(ctx, session.UserId, searchParam)
 		if err != nil {
 			return err
 		}
@@ -68,6 +94,9 @@ func HandleNoteCreate(t *views.Templates, noteService *models.NoteService, label
 				return err
 			}
 			return vr.NoteCreateError(input, labels, fe)
+		}
+		if input.Description == "" {
+			input.Description = input.Title
 		}
 		_, err := noteService.Create(r.Context(), session.UserId, input)
 		if err != nil {
