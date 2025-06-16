@@ -13,6 +13,12 @@ function autoResize(textarea) {
     textarea.style.height = 'auto'; // Reset the height
     textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on content
 }
+
+// resize a to height of b
+function resizeAb(a, b) {
+    a.style.height = 'auto'; // Reset the height
+    a.style.height = b.scrollHeight + 'px'; // Set height based on content
+}
 document.body.addEventListener('htmx:responseError', function (event) {
     // Only handle 500 errors
     if (event.detail.xhr.status === 500) {

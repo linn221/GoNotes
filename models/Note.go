@@ -15,7 +15,7 @@ type Note struct {
 	LabelId      int    `gorm:"index;not null"`
 	ParentNoteId int    `gorm:"index"`
 	Label        Label
-	RemindDate   *time.Time `gorm:"index;default:null"`
+	RemindDate   time.Time `gorm:"index;default:null"`
 	HasUserId
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -108,9 +108,7 @@ func (s *NoteService) Delete(ctx context.Context, userId int, id int) (*Note, er
 
 func (s *NoteService) ConvertToResource(note *Note) *NoteResource {
 	var remindDate MyDate
-	if note.RemindDate != nil {
-		remindDate = MyDate{*note.RemindDate}
-	}
+	remindDate = MyDate{note.RemindDate}
 	res := NoteResource{
 		Id:          note.Id,
 		Title:       note.Title,

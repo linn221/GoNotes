@@ -53,8 +53,8 @@ func Max(max int) ValidateFunc[string] {
 	}
 }
 
-func InFuture(t *time.Time) error {
-	if t == nil {
+func InFuture(t time.Time) error {
+	if t.IsZero() {
 		return nil
 	}
 	if t.After(time.Now()) {

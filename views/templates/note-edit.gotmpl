@@ -8,10 +8,16 @@
 	value="{{.Res.Title}}">
 
 	<label>Description</label>
-	<textarea name="description" cols="30" rows="2">{{.Res.Description}}</textarea>
+	<textarea name="description" rows="1"
+	oninput="autoResize(this)"
+	onfocus="autoResize(this)"
+	>{{.Res.Description}}</textarea>
 
 	<label>Body</label>
-	<textarea name="body" cols="30" rows="10">{{.Res.Body}}</textarea>
+	<textarea name="body" rows="10"
+	oninput="autoResize(this)"
+	onfocus="autoResize(this)"
+	>{{.Res.Body}}</textarea>
 
 	<label>Label</label>
 	<select name="label_id">

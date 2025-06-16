@@ -3,7 +3,7 @@
     <a href="/notes/new" hx-boost="true" role="button">New</a>
     <div id="contents">
         {{ range .ResList }}
-            {{template "note" . }}
+        {{template "note" . }}
         {{ end }}
     </div>
 
@@ -31,7 +31,9 @@
             <div x-show="edit">
                 <form hx-patch="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
                     <label><strong>Edit Body</strong></label>
-                    <textarea name="body" id="note-body-{{.Id}}" oninput="autoResize(this)" onfocus="autoResize(this)">{{.Body}}</textarea>
+                    <textarea name="body" id="note-body-{{.Id}}"
+                        oninput="autoResize(this)"
+                       style="height: auto;">{{.Body}}</textarea>
                     <div>
                         <button type="submit" class="secondary">Submit</button>
                         <button type="button" @click="edit = false" class="contrast">Cancel</button>
@@ -40,9 +42,10 @@
             </div>
 
             <div x-show="!edit">
-                <button @click="edit = true" class="secondary outline">Edit Inline</button>
-                <div>
-                    <pre>{{.Body}}</pre>
+                <button @click="edit = true;"
+                    class="secondary outline">Edit Inline</button>
+                <div id="pre-{{.Id}}" style="white-space: pre;">
+                    {{.Body}}
                 </div>
             </div>
         </div>
@@ -60,7 +63,8 @@
 
     <footer>
         <a href="/notes/{{.Id}}/edit" hx-boost="true" role="button" class="secondary">Edit</a>
-        <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete" hx-target="#note-{{.Id}}" hx-confirm="Are you sure?">Delete</button>
+        <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete" hx-target="#note-{{.Id}}"
+            hx-confirm="Are you sure?">Delete</button>
     </footer>
 </article>
 
