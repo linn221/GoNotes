@@ -3,6 +3,9 @@
 
 ### Try the Demo
 > clone the repo
+
 > cd cmd/demo
+
 > go run .
+
 (no other dependencies required for the demo since it uses sqlite and in memory caching while web version uses MySQL & Redis)
