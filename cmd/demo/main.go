@@ -1,24 +1,50 @@
 package main
 
 import (
-	"context"
+	"fmt"
 	"linn221/shop/app"
-	"linn221/shop/config"
 	"linn221/shop/models"
 	"linn221/shop/views"
+	"log"
+	"os"
 	"path/filepath"
+
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
+func connectSqlite() *gorm.DB {
+	db, err := gorm.Open(sqlite.Open("demo.db"), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	err = db.AutoMigrate(&models.Shop{}, &models.User{}, &models.Image{},
+		&models.Label{},
+		&models.Note{})
+	if err != nil {
+		panic("Error migrating: " + err.Error())
+	}
+
+	fmt.Println("connecting sqlite done")
+	return db
+}
+
 func main() {
-	ctx := context.Background()
-	db := config.ConnectDB()
-	redisCache := config.ConnectRedis(ctx)
-	imageDir := config.GetImageDirectory()
-	port := config.GetPortNo()
-	services := models.NewServices(db, redisCache)
-	baseDir := config.GetBaseDir()
-	templates := views.NewTemplates(filepath.Join(baseDir, "../../views/templates"))
-	assetDir := filepath.Join(baseDir, "../../files/static")
+
+	// get the base directory
+	dir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		log.Fatal(err)
+	}
+	// ctx := context.Background()
+	db := connectSqlite()
+	cache := NewInMemoryCache()
+	imageDir := filepath.Join(dir, "images")
+	port := "8080"
+	services := models.NewServices(db, cache)
+	templates := views.NewTemplates(filepath.Join(dir, "../../views/templates"))
+	assetDir := filepath.Join(dir, "../../files/static")
 
 	// // rate limiting crud endpoints by userId
 	// resourceRateLimit := middlewares.NewRateLimiter(redisCache.GetClient(), time.Minute*5, 2000, "r", func(r *http.Request) (string, error) {
@@ -37,7 +63,7 @@ func main() {
 	// serves http server
 	app := &app.App{
 		DB:             db,
-		Cache:          redisCache,
+		Cache:          cache,
 		ImageDirectory: imageDir,
 		Services:       services,
 		Templates:      templates,

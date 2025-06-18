@@ -3,9 +3,9 @@ package middlewares
 import (
 	"linn221/shop/myctx"
 	"linn221/shop/services"
+	"linn221/shop/utils"
 	"net/http"
 	"strconv"
-	"time"
 )
 
 type SessionMiddleware struct {
@@ -16,16 +16,17 @@ type SessionMiddleware struct {
 func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
 
 	respondInvalidSession := func(w http.ResponseWriter, r *http.Request) {
+		utils.RemoveTokenCookies(w)
 		http.Error(w, "invalid session", http.StatusUnauthorized)
 		// http.Error(w, err.Error(), http.StatusUnauthorized)
 		// remove cookies to avoid infinite loop
-		http.SetCookie(w, &http.Cookie{
-			Name:    "token",
-			Expires: time.Unix(0, 0), // Set to past
-			MaxAge:  -1,              // Also ensures deletion
-			Path:    "/",
-			Domain:  "",
-		})
+		// http.SetCookie(w, &http.Cookie{
+		// 	Name:    "token",
+		// 	Expires: time.Unix(0, 0), // Set to past
+		// 	MaxAge:  -1,              // Also ensures deletion
+		// 	Path:    "/",
+		// 	Domain:  "",
+		// })
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 		return
 	}

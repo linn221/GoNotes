@@ -1,4 +1,4 @@
-package main
+package app
 
 import (
 	"fmt"
@@ -62,6 +62,6 @@ func (app *App) Serve() {
 		IdleTimeout:  time.Minute,
 	}
 
+	fmt.Println("server started. visit http://localhost:" + app.Port)
 	log.Fatal(srv.ListenAndServe())
-	fmt.Println("server started")
 }

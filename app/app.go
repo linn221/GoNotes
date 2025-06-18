@@ -1,8 +1,8 @@
-package main
+package app
 
 import (
-	"linn221/shop/config"
 	"linn221/shop/models"
+	"linn221/shop/services"
 	"linn221/shop/views"
 
 	"gorm.io/gorm"
@@ -10,7 +10,7 @@ import (
 
 type App struct {
 	DB             *gorm.DB
-	Cache          *config.RedisCache
+	Cache          services.CacheService
 	ImageDirectory string
 	AssetDirectory string
 	Services       *models.CrudServices

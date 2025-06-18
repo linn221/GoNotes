@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func NewTrue() *bool {
@@ -118,4 +119,14 @@ func GetClientIP(r *http.Request) string {
 		return r.RemoteAddr // return as is if parsing fails
 	}
 	return host
+}
+
+func RemoveTokenCookies(w http.ResponseWriter) {
+	http.SetCookie(w, &http.Cookie{
+		Name:    "token",
+		Expires: time.Unix(0, 0), // Set to past
+		MaxAge:  -1,              // Also ensures deletion
+		Path:    "/",
+		Domain:  "",
+	})
 }

@@ -44,8 +44,8 @@ func parseTemplateForPage(dir string) func(filenames ...string) *template.Templa
 	}
 }
 
-func NewEngine(baseDir string) *Templates {
-	templateDir := filepath.Join(baseDir, "../../views/templates")
+func NewTemplates(templateDir string) *Templates {
+	// templateDir := filepath.Join(baseDir, "../../views/templates")
 	parsePage := parseTemplateForPage(templateDir)
 	return &Templates{
 		loginTemplate: template.Must(

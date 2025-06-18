@@ -6,6 +6,7 @@ import (
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
 	"linn221/shop/services"
+	"linn221/shop/utils"
 	"linn221/shop/views"
 
 	"net/http"
@@ -108,16 +109,6 @@ func logout(cache services.CacheService, w http.ResponseWriter, r *http.Request)
 		finalErrHandle(w, err)
 		return
 	}
-	removeTokenCookies(w)
+	utils.RemoveTokenCookies(w)
 	htmxRedirect(w, "/login")
-}
-
-func removeTokenCookies(w http.ResponseWriter) {
-	http.SetCookie(w, &http.Cookie{
-		Name:    "token",
-		Expires: time.Unix(0, 0), // Set to past
-		MaxAge:  -1,              // Also ensures deletion
-		Path:    "/",
-		Domain:  "",
-	})
 }
