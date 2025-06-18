@@ -76,7 +76,7 @@ func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Not
 		"Body":        input.Body,
 		"LabelId":     input.LabelId,
 	}
-	if input.RemindDate.IsZero() {
+	if !input.RemindDate.IsZero() {
 		updates["RemindDate"] = input.RemindDate
 	}
 	if err := s.db.WithContext(ctx).Model(&note).Updates(updates).Error; err != nil {
