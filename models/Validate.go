@@ -59,13 +59,6 @@ func NewFilter(cond string, values ...interface{}) *HasFilter {
 	}
 }
 
-func NewShopFilter(shopId string) *HasFilter {
-	return &HasFilter{
-		Cond:         "shop_id = ?",
-		FilterValues: []interface{}{shopId},
-	}
-}
-
 // check if resource exists (where business_id = ?)
 type ruleExists struct {
 	statusCode *int

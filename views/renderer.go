@@ -6,14 +6,6 @@ import (
 	"path/filepath"
 )
 
-// var
-//
-//	(
-//		loginTemplate    *template.Template
-//	registerTemplate *template.Template
-//	labelTemplate    *template.Template
-//	testTemplate     *template.Template
-//	)
 
 type Templates struct {
 	loginTemplate    *template.Template
