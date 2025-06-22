@@ -75,9 +75,7 @@ func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Not
 		"Description": input.Description,
 		"Body":        input.Body,
 		"LabelId":     input.LabelId,
-	}
-	if !input.RemindDate.IsZero() {
-		updates["RemindDate"] = input.RemindDate
+		"RemindDate":  input.RemindDate,
 	}
 	if err := s.db.WithContext(ctx).Model(&note).Updates(updates).Error; err != nil {
 		return nil, err
@@ -150,6 +148,9 @@ func (s *NoteService) Get(ctx context.Context, userId int, id int) (*NoteResourc
 	res := s.ConvertToResource(note)
 	return res, nil
 }
+
+// func (s *NoteService) GetRemindNotes(ctx context.Context, userId int) ([]Note, error) {
+// }
 
 type NoteSearchParam struct {
 	LabelId int

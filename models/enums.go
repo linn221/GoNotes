@@ -16,6 +16,10 @@ func (t MyDateTime) String() string {
 	return t.Format("Jan 2 3:04 PM")
 }
 
+func (t MyDateTime) DateString() string {
+	return t.Format("Jan 2")
+}
+
 type MyDate struct {
 	time.Time
 }

@@ -14,13 +14,11 @@
 
 <article id="note-{{.Id}}">
     <header>
-        <h3>{{.Title}}</h3>
+        <h3>{{.Title}} </h3>
     </header>
 
-    <p>
-        <small>Label:</small>
-        <strong><a href="/notes?label_id={{.LabelId}}">{{.LabelName}}</a></strong>
-    </p>
+    <small>Label:</small>
+    <strong><a href="/notes?label_id={{.LabelId}}">{{.LabelName}}</a></strong>
 
     <details>
         <summary>
@@ -55,8 +53,8 @@
             <small>Created At: <strong>{{.CreatedAt}}</strong></small>
             <br>
             <small>Updated At: <strong>{{.UpdatedAt}}</strong></small>
-            <br>
             {{ if not .RemindDate.IsZero }}
+            <br>
             <small>Remind: <strong>{{.RemindDate}}</strong></small>
             {{end}}
         </footer>
