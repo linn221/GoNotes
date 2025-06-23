@@ -148,3 +148,14 @@ func HandleNoteUpdateBody(t *views.Templates, noteService *models.NoteService) h
 		return vr.NoteUpdateBodySuccess(updated)
 	})
 }
+
+func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
+	return MinHandler(func(w http.ResponseWriter, r *http.Request, userId int) error {
+		ctx := r.Context()
+		notes, err := noteService.ListNotes(ctx, userId, nil)
+		if err != nil {
+			return err
+		}
+		return noteService.Export(ctx, w, notes)
+	})
+}

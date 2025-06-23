@@ -2,6 +2,8 @@ package models
 
 import (
 	"context"
+	"encoding/csv"
+	"net/http"
 	"time"
 
 	"gorm.io/gorm"
@@ -188,3 +190,83 @@ func (s *NoteService) ListNotes(ctx context.Context, userId int, param *NoteSear
 
 	return resCollection, nil
 }
+
+func (n *NoteResource) CsvValues() []string {
+	values := make([]string, 0, 5)
+	values = append(values,
+		n.Title,
+		n.RemindDate.Format(time.DateOnly),
+		n.LabelName,
+		n.Description,
+		n.Body,
+	)
+	return values
+}
+
+func (s *NoteService) Export(ctx context.Context, w http.ResponseWriter, notes []*NoteResource) error {
+
+	filename := time.Now().Format(time.DateOnly) + ".csv"
+	// Set headers to force download
+	w.Header().Set("Content-Disposition", "attachment;filename="+filename)
+	w.Header().Set("Content-Type", "text/csv")
+	csvWriter := csv.NewWriter(w)
+	if err := csvWriter.Write([]string{"title", "remind_date", "label", "description", "body"}); err != nil {
+		return err
+	}
+	for _, note := range notes {
+		csvWriter.Write(note.CsvValues())
+	}
+	csvWriter.Flush()
+	return csvWriter.Error()
+}
+
+type ImportedNote struct {
+	Title       string
+	RemindDate  time.Time
+	Label       string
+	Description string
+	Body        string
+}
+
+func parseImportedNote(row []string) *ImportedNote {
+	t, err := time.Parse(time.DateOnly, row[1])
+	if err != nil {
+		panic(err)
+	}
+	return &ImportedNote{
+		Title:       row[0],
+		RemindDate:  t,
+		Label:       row[2],
+		Description: row[3],
+		Body:        row[4],
+	}
+}
+
+// func (s *NoteService) importNotes(ctx context.Context, userId int, rows [][]string) error {
+
+// 	labelService := LabelService{db: s.db}
+// 	labels, err := labelService.ListAll(ctx, userId)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	labelMap := make(map[string]int, len(labels))
+// 	for _, label := range labels {
+// 		labelMap[label.Name] = label.Id
+// 	}
+
+// 	tx := s.db.WithContext(ctx).Begin()
+// 	labelService.db = tx
+// 	for _, row := range rows {
+// 		imported := parseImportedNote(row)
+// 		labelId, labelFound := labelMap[imported.Label]
+// 		if !labelFound {
+// 			newlabel, err := labelService.Create(ctx, userId, &Label{Name: imported.Label})
+// 			if err != nil {
+// 				return err
+// 			}
+// 			labelId = newlabel.Id
+// 			labelMap[newlabel.Name] = newlabel.Id
+// 		}
+
+// 	}
+// }

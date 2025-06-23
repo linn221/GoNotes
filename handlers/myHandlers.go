@@ -15,6 +15,28 @@ type DefaultSession struct {
 
 type DefaultHandlerFunc func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error
 
+func handleError(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+}
+
+type MinHandlerFunc func(w http.ResponseWriter, r *http.Request, userId int) error
+
+func MinHandler(handle MinHandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		ctx := r.Context()
+		userId, err := myctx.GetUserId(ctx)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		err = handle(w, r, userId)
+		if err != nil {
+			handleError(w, err)
+		}
+	}
+}
+
 func DefaultHandler(t *views.Templates, handle DefaultHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
