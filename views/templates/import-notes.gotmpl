@@ -1,7 +1,14 @@
 {{ define "main"}}
-<form hx-post="/import-notes" enctype="multipart/form-data">
-    <label>Upload previously exported file (xxx.csv)</label>
-    <input type="file" name="csvfile">
-    <button type="submit">Import</button>
-</form>
+<section hx-boost="false">
+
+    <h3>Import notes</h3>
+    <form hx-post="/notes/import" enctype="multipart/form-data" hx-swap="none">
+
+        <!-- hx-post="/notes-import"
+hx-swap="none" -->
+        <label>Upload previously exported file (xxx.csv)</label>
+        <input type="file" name="csvfile">
+        <button type="submit">Import</button>
+    </form>
+</section>
 {{end}}

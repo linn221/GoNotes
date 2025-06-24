@@ -158,7 +158,19 @@ func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
 		if err != nil {
 			return err
 		}
-		return noteService.Export(ctx, w, notes)
+		err = noteService.Export(ctx, w, notes)
+		if err != nil {
+			return err
+		}
+
+		// htmxRedirect(w, "/")
+		return nil
+	})
+}
+
+func ShowNoteImport(t *views.Templates) http.HandlerFunc {
+	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
+		return vr.NoteImportPage()
 	})
 }
 
@@ -192,6 +204,11 @@ func HandleNoteImport(noteService *models.NoteService) http.HandlerFunc {
 			}
 			records = append(records, record)
 		}
-		return noteService.ImportNotes(r.Context(), userId, records)
+		err = noteService.ImportNotes(r.Context(), userId, records)
+		if err != nil {
+			return err
+		}
+		htmxRedirect(w, "/")
+		return nil
 	})
 }

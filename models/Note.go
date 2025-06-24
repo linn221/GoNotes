@@ -280,7 +280,7 @@ func (s *NoteService) ImportNotes(ctx context.Context, userId int, rows [][]stri
 
 	tx := s.db.WithContext(ctx).Begin()
 	labelService.db = tx
-	for _, row := range rows {
+	for _, row := range rows[1:] {
 		imported := parseImportedNote(row)
 		labelId, labelFound := labelMap[imported.Label]
 		if !labelFound {
@@ -303,6 +303,7 @@ func (s *NoteService) ImportNotes(ctx context.Context, userId int, rows [][]stri
 				RemindDate:  imported.RemindDate,
 				Body:        imported.Body,
 			}
+			newNote.UserId = userId
 			if err := tx.Create(&newNote).Error; err != nil {
 				return err
 			}
