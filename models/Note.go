@@ -3,6 +3,8 @@ package models
 import (
 	"context"
 	"encoding/csv"
+	"fmt"
+	"linn221/shop/utils"
 	"net/http"
 	"time"
 
@@ -191,14 +193,25 @@ func (s *NoteService) ListNotes(ctx context.Context, userId int, param *NoteSear
 	return resCollection, nil
 }
 
+func (n *NoteResource) Checksum() string {
+	return utils.HashString(fmt.Sprintf("title=%s&remindDate=%s&label=%s&desc=%s&body=%s",
+		n.Title,
+		n.RemindDate.Format(time.DateOnly),
+		n.LabelName,
+		n.Description,
+		n.Body,
+	))
+}
+
 func (n *NoteResource) CsvValues() []string {
-	values := make([]string, 0, 5)
+	values := make([]string, 0, 6)
 	values = append(values,
 		n.Title,
 		n.RemindDate.Format(time.DateOnly),
 		n.LabelName,
 		n.Description,
 		n.Body,
+		n.Checksum(),
 	)
 	return values
 }
@@ -210,7 +223,7 @@ func (s *NoteService) Export(ctx context.Context, w http.ResponseWriter, notes [
 	w.Header().Set("Content-Disposition", "attachment;filename="+filename)
 	w.Header().Set("Content-Type", "text/csv")
 	csvWriter := csv.NewWriter(w)
-	if err := csvWriter.Write([]string{"title", "remind_date", "label", "description", "body"}); err != nil {
+	if err := csvWriter.Write([]string{"title", "remind_date", "label", "description", "body", "checksum"}); err != nil {
 		return err
 	}
 	for _, note := range notes {
@@ -226,6 +239,7 @@ type ImportedNote struct {
 	Label       string
 	Description string
 	Body        string
+	Checksum    string
 }
 
 func parseImportedNote(row []string) *ImportedNote {
@@ -239,34 +253,64 @@ func parseImportedNote(row []string) *ImportedNote {
 		Label:       row[2],
 		Description: row[3],
 		Body:        row[4],
+		Checksum:    row[5],
 	}
 }
 
-// func (s *NoteService) importNotes(ctx context.Context, userId int, rows [][]string) error {
+func (s *NoteService) ImportNotes(ctx context.Context, userId int, rows [][]string) error {
 
-// 	labelService := LabelService{db: s.db}
-// 	labels, err := labelService.ListAll(ctx, userId)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	labelMap := make(map[string]int, len(labels))
-// 	for _, label := range labels {
-// 		labelMap[label.Name] = label.Id
-// 	}
+	labelService := LabelService{db: s.db}
+	labels, err := labelService.ListAll(ctx, userId)
+	if err != nil {
+		return err
+	}
 
-// 	tx := s.db.WithContext(ctx).Begin()
-// 	labelService.db = tx
-// 	for _, row := range rows {
-// 		imported := parseImportedNote(row)
-// 		labelId, labelFound := labelMap[imported.Label]
-// 		if !labelFound {
-// 			newlabel, err := labelService.Create(ctx, userId, &Label{Name: imported.Label})
-// 			if err != nil {
-// 				return err
-// 			}
-// 			labelId = newlabel.Id
-// 			labelMap[newlabel.Name] = newlabel.Id
-// 		}
+	labelMap := make(map[string]int, len(labels))
+	for _, label := range labels {
+		labelMap[label.Name] = label.Id
+	}
+	existingNotes, err := s.ListNotes(ctx, userId, nil)
+	if err != nil {
+		return err
+	}
+	existingChecksums := make(map[string]struct{}, len(existingNotes))
+	for _, note := range existingNotes {
+		existingChecksums[note.Checksum()] = struct{}{}
+	}
 
-// 	}
-// }
+	tx := s.db.WithContext(ctx).Begin()
+	labelService.db = tx
+	for _, row := range rows {
+		imported := parseImportedNote(row)
+		labelId, labelFound := labelMap[imported.Label]
+		if !labelFound {
+			// create labe if not found
+			newlabel, err := labelService.Create(ctx, userId, &Label{Name: imported.Label})
+			if err != nil {
+				return err
+			}
+			labelId = newlabel.Id
+			labelMap[newlabel.Name] = newlabel.Id
+		}
+
+		// if the note exits or not
+		_, exists := existingChecksums[imported.Checksum]
+		if !exists {
+			newNote := Note{
+				Title:       imported.Title,
+				Description: imported.Description,
+				LabelId:     labelId,
+				RemindDate:  imported.RemindDate,
+				Body:        imported.Body,
+			}
+			if err := tx.Create(&newNote).Error; err != nil {
+				return err
+			}
+			existingChecksums[imported.Checksum] = struct{}{}
+		}
+	}
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+	return nil
+}

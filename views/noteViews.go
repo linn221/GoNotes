@@ -63,3 +63,7 @@ func (r *Renderer) NoteIndexPage(notes []*models.NoteResource) error {
 		"PageTitle": "Notes",
 	})
 }
+
+func (r *Renderer) NoteImportPage() error {
+	return r.templates.importNoteTemplate.Execute(r.w, nil)
+}

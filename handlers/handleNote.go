@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"context"
+	"encoding/csv"
+	"io"
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
 	"linn221/shop/services"
@@ -157,5 +159,39 @@ func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
 			return err
 		}
 		return noteService.Export(ctx, w, notes)
+	})
+}
+
+func HandleNoteImport(noteService *models.NoteService) http.HandlerFunc {
+
+	return MinHandler(func(w http.ResponseWriter, r *http.Request, userId int) error {
+		// Parse multipart form
+		err := r.ParseMultipartForm(10 << 20) // 10 MB max
+		if err != nil {
+			return err
+		}
+
+		// Get the file from form field "csvfile"
+		file, _, err := r.FormFile("csvfile")
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+
+		// Parse the CSV file
+		reader := csv.NewReader(file)
+		var records [][]string
+
+		for {
+			record, err := reader.Read()
+			if err == io.EOF {
+				break
+			}
+			if err != nil {
+				return err
+			}
+			records = append(records, record)
+		}
+		return noteService.ImportNotes(r.Context(), userId, records)
 	})
 }

@@ -1,0 +1,7 @@
+{{ define "main"}}
+<form hx-post="/import-notes" enctype="multipart/form-data">
+    <label>Upload previously exported file (xxx.csv)</label>
+    <input type="file" name="csvfile">
+    <button type="submit">Import</button>
+</form>
+{{end}}

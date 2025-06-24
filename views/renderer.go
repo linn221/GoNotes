@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 )
 
-
 type Templates struct {
 	loginTemplate    *template.Template
 	registerTemplate *template.Template
@@ -16,6 +15,7 @@ type Templates struct {
 	noteTemplate           *template.Template
 	noteCreateTemplate     *template.Template
 	noteEditTemplate       *template.Template
+	importNoteTemplate     *template.Template
 	changePasswordTemplate *template.Template
 
 	// internalErrorTemplate  *template.Template //2d
@@ -50,6 +50,7 @@ func NewTemplates(templateDir string) *Templates {
 		noteTemplate:           parsePage("note.gotmpl"),
 		noteCreateTemplate:     parsePage("note-create.gotmpl"),
 		noteEditTemplate:       parsePage("note-edit.gotmpl"),
+		importNoteTemplate:     parsePage("import-notes.gotmpl"),
 	}
 }
 
