@@ -36,12 +36,12 @@ func (app *App) Serve() {
 	//notes
 	authMux.HandleFunc("GET /notes/new", handlers.ShowNoteCreate(t, myServices.LabelService))
 	authMux.HandleFunc("GET /notes/{id}/edit", handlers.ShowNoteEdit(t, myServices.NoteService, myServices.LabelService))
-	authMux.HandleFunc("GET /notes", handlers.ShowNoteIndex(t, myServices.NoteService))
+	authMux.HandleFunc("GET /notes", handlers.ShowNoteIndex(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("POST /notes", handlers.HandleNoteCreate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("POST /notes/export", handlers.HandleNoteExport(myServices.NoteService))
 	authMux.HandleFunc("GET /notes/import", handlers.ShowNoteImport(t))
 	authMux.HandleFunc("POST /notes/import", handlers.HandleNoteImport(myServices.NoteService))
-	authMux.HandleFunc("PATCH /notes/{id}", handlers.HandleNoteUpdateBody(t, myServices.NoteService))
+	authMux.HandleFunc("PATCH /notes/{id}", handlers.HandleNotePartialUpdate(t, myServices.NoteService))
 	authMux.HandleFunc("PUT /notes/{id}", handlers.HandleNoteUpdate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("DELETE /notes/{id}", handlers.HandleNoteDelete(myServices.NoteService))
 

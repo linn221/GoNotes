@@ -57,9 +57,10 @@ func (r *Renderer) NoteEditError(userId int, resId int, input *models.Note, errm
 // 	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
 // }
 
-func (r *Renderer) NoteIndexPage(notes []*models.NoteResource) error {
+func (r *Renderer) NoteIndexPage(notes []*models.NoteResource, labels []models.Label) error {
 	return r.templates.noteTemplate.Execute(r.w, map[string]any{
 		"ResList":   notes,
+		"Labels":    labels,
 		"PageTitle": "Notes",
 	})
 }

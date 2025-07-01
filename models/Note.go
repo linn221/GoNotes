@@ -100,15 +100,21 @@ func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body s
 }
 
 func (s *NoteService) UpdateLabel(ctx context.Context, userId int, id int, labelId int) (*NoteResource, error) {
-	note, err := s.fetch(ctx, userId, id, "Label")
+	note, err := s.fetch(ctx, userId, id)
 	if err != nil {
 		return nil, err
 	}
-	if err := Validate(s.db.WithContext(ctx), NewExistsRule("labels", labelId, "label not found", NewFilter("user_id = ?", userId))); err != nil {
+
+	if err := Validate(s.db.WithContext(ctx), NewExistsRule("labels", labelId, "label not found", NewFilter("user_id = ? AND is_active = 1", userId))); err != nil {
 		return nil, err
 	}
 
 	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("label_id", labelId).Error
+	if err != nil {
+		return nil, err
+	}
+
+	note, err = s.fetch(ctx, userId, id, "Label")
 	if err != nil {
 		return nil, err
 	}

@@ -22,6 +22,24 @@
 
     <small>Label:</small>
     <strong><a href="/notes?label_id={{.LabelId}}">{{.LabelName}}</a></strong>
+    <div class="grid">
+        <select
+            name="label_id"
+            class="contrast"
+            hx-patch="/notes/{{.Id}}"
+            hx-trigger="change"
+            hx-target="#note-{{.Id}}"
+            hx-swap="outerHTML"
+        >
+        {{ $labelId := .LabelId }}
+            {{range .Labels}}
+            <option value="{{.Id}}" {{if eq $labelId .Id}}selected{{end}}>
+                {{.Name}}
+            </option>
+            {{end}}
+        </select>
+        <div></div>
+    </div>
 
     <details>
         <summary>
