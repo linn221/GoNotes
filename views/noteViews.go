@@ -5,6 +5,7 @@ import (
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
 	"linn221/shop/services"
+	"linn221/shop/utils"
 )
 
 func (r *Renderer) NoteCreateForm(userId int, labels []models.Label, labelId int) error {
@@ -27,8 +28,10 @@ func (r *Renderer) NoteCreateError(input *models.Note, labels []models.Label, er
 	return r.templates.noteCreateTemplate.ExecuteTemplate(r.w, "create_form2", m)
 }
 
-func (r *Renderer) NoteUpdateBodySuccess(note *models.NoteResource) error {
-	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
+func (r *Renderer) NoteUpdateBodySuccess(note *models.NoteResource, labels []models.Label) error {
+
+	noteData := newNoteData(note, labels)
+	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", noteData)
 }
 
 func (r *Renderer) NoteEditForm(userId int, resId int, res *models.NoteResource, labels []models.Label) error {
@@ -53,13 +56,36 @@ func (r *Renderer) NoteEditError(userId int, resId int, input *models.Note, errm
 	return r.templates.noteEditTemplate.ExecuteTemplate(r.w, "edit_form2", m)
 }
 
-// func (r Renderer) NoteCreateSuccess(note *models.NoteResource) error {
-// 	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
-// }
+//	func (r Renderer) NoteCreateSuccess(note *models.NoteResource) error {
+//		return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
+//	}
+type noteData struct {
+	*models.NoteResource
+	BodyShort        string
+	ReadMoreRequired bool
+	HasBody          bool
+	Labels           []models.Label
+}
 
-func (r *Renderer) NoteIndexPage(notes []*models.NoteResource) error {
+func newNoteData(note *models.NoteResource, labels []models.Label) *noteData {
+	excerpt, readMoreRequired := utils.GenerateExcerpt(note.Body, 20)
+	return &noteData{
+		NoteResource:     note,
+		Labels:           labels,
+		BodyShort:        excerpt,
+		HasBody:          note.Body != "",
+		ReadMoreRequired: readMoreRequired,
+	}
+}
+
+func (r *Renderer) NoteIndexPage(notes []*models.NoteResource, labels []models.Label) error {
+	noteCollection := make([]*noteData, 0, len(notes))
+	for _, note := range notes {
+		noteCollection = append(noteCollection, newNoteData(note, labels))
+	}
+
 	return r.templates.noteTemplate.Execute(r.w, map[string]any{
-		"ResList":   notes,
+		"ResList":   noteCollection,
 		"PageTitle": "Notes",
 	})
 }

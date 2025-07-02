@@ -1,9 +1,20 @@
 {{ define "main"}}
 <section id="main">
-    <form hx-boost="false" id="export-form" action="/notes/export" method="POST" target="_blank" >
+    <form hx-boost="false" id="export-form" action="/notes/export" method="POST" target="_blank">
     </form>
-    <a href="/notes/new" hx-boost="true" role="button">New</a>
-    <button type="submit" form="export-form" style="display: inline;">Export</button>
+    <nav>
+        <ul>
+            <li>
+                <a role="button" href="/notes/new" hx-boost="true">New</a>
+            </li>
+        </ul>
+        <ul>
+
+            <li>
+                <button type="submit" form="export-form">Export</button>
+            </li>
+        </ul>
+    </nav>
     <div id="contents">
         {{ range .ResList }}
         {{template "note" . }}
@@ -15,58 +26,78 @@
 
 {{define "note"}}
 
-<article id="note-{{.Id}}">
+<article id="note-{{.Id}}" x-data="{ showDetail: false, showInlineForm: false}">
     <header>
-        <h3>{{.Title}} </h3>
+        `{{.Title}}` at {{.CreatedAt}}
     </header>
 
-    <small>Label:</small>
-    <strong><a href="/notes?label_id={{.LabelId}}">{{.LabelName}}</a></strong>
+    {{if not .RemindDate.IsZero}}
+    <div class="grid">
+        <input type="date" name="remind" value="{{.RemindDate.InputValue}}" hx-patch="/notes/{{.Id}}"
+            hx-trigger="change" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
+        <div></div>
+        <div></div>
+    </div>
+    {{end}}
 
-    <details>
-        <summary>
-            <strong>{{.Description}}</strong>
-        </summary>
+    <div class="grid">
+        <select name="label_id" class="contrast" hx-patch="/notes/{{.Id}}" hx-trigger="change" hx-target="#note-{{.Id}}"
+            hx-swap="outerHTML">
+            {{range .Labels}}
+            <option value="{{.Id}}" {{if eq $.LabelId .Id}}selected{{end}}>
+                {{.Name}}
+            </option>
+            {{end}}
+        </select>
+        <div></div>
+        <div></div>
+    </div>
 
-        <div x-data="{ edit: false }">
-            <div x-show="edit">
-                <form hx-patch="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
-                    <label><strong>Edit Body</strong></label>
-                    <textarea name="body" id="note-body-{{.Id}}"
-                        oninput="autoResize(this)"
-                        onfocus="autoResize(this)"
-                       >{{.Body}}</textarea>
-                    <div>
-                        <button type="submit" class="secondary">Submit</button>
-                        <button type="button" @click="edit = false" class="contrast">Cancel</button>
-                    </div>
-                </form>
-            </div>
+    <i>{{.Description}}</i>
 
-            <div x-show="!edit">
-                <button @click="edit = true;"
-                    class="secondary outline">Edit Inline</button>
-                    <md-block>
-                    {{.Body}}
-                    </md-block>
+    {{if .HasBody}}
+    <hr>
+    <div class="note-body">
+
+        <div x-show="showDetail">
+            {{.Body}}
+            <button @click="showDetail = false;" class="link-like-button">less</button>
+        </div>
+
+        <div x-show="!showDetail">
+            <div>
+                {{.BodyShort}}
+                {{if .ReadMoreRequired}}
+                <button @click="showDetail = true;" class="link-like-button">...more</button>
+                {{end}}
             </div>
         </div>
 
-        <footer>
-            <small>Created At: <strong>{{.CreatedAt}}</strong></small>
-            <br>
-            <small>Updated At: <strong>{{.UpdatedAt}}</strong></small>
-            {{ if not .RemindDate.IsZero }}
-            <br>
-            <small>Remind: <strong>{{.RemindDate}}</strong></small>
-            {{end}}
-        </footer>
-    </details>
+        <div x-show="showInlineForm">
+            <form hx-patch="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
+                <label><strong>Edit Body</strong></label>
+                <textarea name="body" id="note-body-{{.Id}}" oninput="autoResize(this)"
+                    onfocus="autoResize(this)">{{.Body}}</textarea>
+                <div>
+                    <button type="submit" class="secondary">Submit</button>
+                </div>
+            </form>
+            <button @click="showInlineForm = false;" style="display: block; width: 100%;">close</button>
+        </div>
+    </div>
+    <hr>
+    {{else}}
+        <br>
+    {{end}}
+
+    <!-- <small>Created At: <span class="semi-bold">{{.CreatedAt}}</span></small> -->
+    <small>Updated At: <span class="semi-bold">{{.UpdatedAt}}</span></small>
 
     <footer>
         <a href="/notes/{{.Id}}/edit" hx-boost="true" role="button" class="secondary">Edit</a>
         <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete" hx-target="#note-{{.Id}}"
             hx-confirm="Are you sure?">Delete</button>
+        <button x-show="!showInlineForm" @click="showInlineForm = true;" class="secondary outline">Edit Body</button>
     </footer>
 </article>
 

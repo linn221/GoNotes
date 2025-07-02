@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"linn221/shop/utils"
 	"net/http"
@@ -100,15 +101,43 @@ func (s *NoteService) UpdateBody(ctx context.Context, userId int, id int, body s
 }
 
 func (s *NoteService) UpdateLabel(ctx context.Context, userId int, id int, labelId int) (*NoteResource, error) {
-	note, err := s.fetch(ctx, userId, id, "Label")
+	note, err := s.fetch(ctx, userId, id)
 	if err != nil {
 		return nil, err
 	}
-	if err := Validate(s.db.WithContext(ctx), NewExistsRule("labels", labelId, "label not found", NewFilter("user_id = ?", userId))); err != nil {
+
+	if err := Validate(s.db.WithContext(ctx), NewExistsRule("labels", labelId, "label not found", NewFilter("user_id = ? AND is_active = 1", userId))); err != nil {
 		return nil, err
 	}
 
 	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("label_id", labelId).Error
+	if err != nil {
+		return nil, err
+	}
+
+	note, err = s.fetch(ctx, userId, id, "Label")
+	if err != nil {
+		return nil, err
+	}
+	return s.ConvertToResource(note), nil
+}
+
+func (s *NoteService) UpdateRemindDate(ctx context.Context, userId int, id int, inputdate time.Time) (*NoteResource, error) {
+	note, err := s.fetch(ctx, userId, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if inputdate.Before(time.Now()) {
+		return nil, errors.New("remind date must be in future")
+	}
+
+	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("remind_date", inputdate).Error
+	if err != nil {
+		return nil, err
+	}
+
+	note, err = s.fetch(ctx, userId, id, "Label")
 	if err != nil {
 		return nil, err
 	}
@@ -161,7 +190,7 @@ type NoteSearchParam struct {
 }
 
 func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, error) {
-	notes, err := find[Note](s.db.WithContext(ctx), userId, "Label")
+	notes, err := find[Note](s.db.WithContext(ctx).Order("updated_at DESC"), userId, "Label")
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +206,7 @@ func (s *NoteService) ListNotes(ctx context.Context, userId int, param *NoteSear
 			dbCtx.Where("label_id = ?", param.LabelId)
 		}
 
-		err = dbCtx.Find(&notes).Error
+		err = dbCtx.Order("updated_at DESC").Find(&notes).Error
 	} else {
 		notes, err = s.listAllNotes(ctx, userId)
 	}

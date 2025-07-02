@@ -3,6 +3,7 @@ package handlers
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"io"
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
@@ -10,6 +11,7 @@ import (
 	"linn221/shop/views"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func parseNote(r *http.Request) (*models.Note, services.FormErrors) {
@@ -67,7 +69,7 @@ func ShowNoteEdit(t *views.Templates, noteService *models.NoteService, labelServ
 	})
 }
 
-func ShowNoteIndex(t *views.Templates, noteService *models.NoteService) http.HandlerFunc {
+func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
 	parseSearchParam := func(r *http.Request) *models.NoteSearchParam {
 		var searchParam *models.NoteSearchParam
 		labelId, ok := getQueryInt(r, "label_id")
@@ -83,7 +85,11 @@ func ShowNoteIndex(t *views.Templates, noteService *models.NoteService) http.Han
 		if err != nil {
 			return err
 		}
-		return vr.NoteIndexPage(notes)
+		labels, err := labelService.ListActiveOnly(ctx, session.UserId)
+		if err != nil {
+			return err
+		}
+		return vr.NoteIndexPage(notes, labels)
 	})
 }
 
@@ -140,14 +146,37 @@ func HandleNoteDelete(noteService *models.NoteService) http.HandlerFunc {
 	})
 }
 
-func HandleNoteUpdateBody(t *views.Templates, noteService *models.NoteService) http.HandlerFunc {
+func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
 	return ResourceHandler(t, func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error {
-		body := r.PostFormValue("body")
-		updated, err := noteService.UpdateBody(r.Context(), session.UserId, session.ResId, body)
+		var updated *models.NoteResource
+		var err error
+		if body := r.PostFormValue("body"); body != "" {
+			updated, err = noteService.UpdateBody(r.Context(), session.UserId, session.ResId, body)
+		} else if labelIdStr := r.PostFormValue("label_id"); labelIdStr != "" {
+			labelId, err2 := strconv.Atoi(labelIdStr)
+			if err2 != nil {
+				return err2
+			}
+			updated, err = noteService.UpdateLabel(ctx, session.UserId, session.ResId, labelId)
+		} else if remindDateStr := r.PostFormValue("remind"); remindDateStr != "" {
+			inputRemindDate, err2 := time.Parse(time.DateOnly, remindDateStr) // to avoid err being shadowed
+			if err2 != nil {
+				return err
+			}
+			updated, err = noteService.UpdateRemindDate(ctx, session.UserId, session.ResId, inputRemindDate)
+		} else {
+			err = errors.New("no form data")
+		}
+
 		if err != nil {
 			return err
 		}
-		return vr.NoteUpdateBodySuccess(updated)
+		labels, err := labelService.ListActiveOnly(ctx, session.UserId)
+		if err != nil {
+			return err
+		}
+
+		return vr.NoteUpdateBodySuccess(updated, labels)
 	})
 }
 

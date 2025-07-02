@@ -1,25 +1,22 @@
 {{ define "nav" }}
-<nav class="navbar">
-    <ul>
-        <li><a href="/notes" hx-boost="true">Notes</a></li>
-        <li><a href="/labels" hx-boost="true">Labels</a></li>
-        <li><a href="/notes/import">Import Notes</a></li>
-
-    </ul>
-    <ul>
-        <li>
-        <details role="list">
-        <summary aria-haspopup="listbox">Acc</summary>
-        <ul role="listbox">
-            <li>
-                <button hx-post="/logout">Logout</button>
-            </li>
-            <li>
-                <a href="/change-password" hx-boost="true" role="button">Change Password</a>
-            </li>
+<nav>
+  <ul>
+    <li><a href="/notes" hx-boost="true">Notes</a></li>
+    <li><a href="/labels" hx-boost="true">Labels</a></li>
+    <li><a href="/notes/import">Import Notes</a></li>
+  </ul>
+  <ul>
+    <li>
+      <details class="dropdown">
+        <summary>
+          Account
+        </summary>
+        <ul dir="rtl">
+          <li><a href="/change-password">Change Password</a></li>
+          <li hx-post="/logout" style="cursor: pointer;">Logout</li>
         </ul>
-        </details>
-        </li>
-    </ul>
+      </details>
+    </li>
+  </ul>
 </nav>
-{{end }}
+{{end}}
