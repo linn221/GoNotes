@@ -130,3 +130,12 @@ func RemoveTokenCookies(w http.ResponseWriter) {
 		Domain:  "",
 	})
 }
+
+// second bool for requiredReadMore
+func GenerateExcerpt(s string, n int) (string, bool) {
+	words := strings.Fields(s)
+	if len(words) <= n {
+		return s, false
+	}
+	return strings.Join(words[:n], " "), true
+}

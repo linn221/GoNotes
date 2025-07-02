@@ -3,6 +3,7 @@ package models
 import (
 	"context"
 	"encoding/csv"
+	"errors"
 	"fmt"
 	"linn221/shop/utils"
 	"net/http"
@@ -110,6 +111,28 @@ func (s *NoteService) UpdateLabel(ctx context.Context, userId int, id int, label
 	}
 
 	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("label_id", labelId).Error
+	if err != nil {
+		return nil, err
+	}
+
+	note, err = s.fetch(ctx, userId, id, "Label")
+	if err != nil {
+		return nil, err
+	}
+	return s.ConvertToResource(note), nil
+}
+
+func (s *NoteService) UpdateRemindDate(ctx context.Context, userId int, id int, inputdate time.Time) (*NoteResource, error) {
+	note, err := s.fetch(ctx, userId, id)
+	if err != nil {
+		return nil, err
+	}
+
+	if inputdate.Before(time.Now()) {
+		return nil, errors.New("remind date must be in future")
+	}
+
+	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("remind_date", inputdate).Error
 	if err != nil {
 		return nil, err
 	}

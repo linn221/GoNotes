@@ -5,6 +5,7 @@ import (
 	"linn221/shop/formscanner"
 	"linn221/shop/models"
 	"linn221/shop/services"
+	"linn221/shop/utils"
 )
 
 func (r *Renderer) NoteCreateForm(userId int, labels []models.Label, labelId int) error {
@@ -27,8 +28,8 @@ func (r *Renderer) NoteCreateError(input *models.Note, labels []models.Label, er
 	return r.templates.noteCreateTemplate.ExecuteTemplate(r.w, "create_form2", m)
 }
 
-func (r *Renderer) NoteUpdateBodySuccess(note *models.NoteResource) error {
-	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
+func (r *Renderer) NoteUpdateBodySuccess(note *models.NoteResource, labels []models.Label) error {
+	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", noteResource{NoteResource: note, Labels: labels})
 }
 
 func (r *Renderer) NoteEditForm(userId int, resId int, res *models.NoteResource, labels []models.Label) error {
@@ -53,14 +54,30 @@ func (r *Renderer) NoteEditError(userId int, resId int, input *models.Note, errm
 	return r.templates.noteEditTemplate.ExecuteTemplate(r.w, "edit_form2", m)
 }
 
-// func (r Renderer) NoteCreateSuccess(note *models.NoteResource) error {
-// 	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
-// }
+//	func (r Renderer) NoteCreateSuccess(note *models.NoteResource) error {
+//		return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", note)
+//	}
+type noteResource struct {
+	*models.NoteResource
+	BodyShort        string
+	ReadMoreRequired bool
+	Labels           []models.Label
+}
 
 func (r *Renderer) NoteIndexPage(notes []*models.NoteResource, labels []models.Label) error {
+	noteCollection := make([]noteResource, 0, len(notes))
+	for _, note := range notes {
+		excerpt, readMoreRequired := utils.GenerateExcerpt(note.Body, 20)
+		noteCollection = append(noteCollection, noteResource{
+			NoteResource:     note,
+			Labels:           labels,
+			BodyShort:        excerpt,
+			ReadMoreRequired: readMoreRequired,
+		})
+	}
+
 	return r.templates.noteTemplate.Execute(r.w, map[string]any{
-		"ResList":   notes,
-		"Labels":    labels,
+		"ResList":   noteCollection,
 		"PageTitle": "Notes",
 	})
 }

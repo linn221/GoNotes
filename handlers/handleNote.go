@@ -11,6 +11,7 @@ import (
 	"linn221/shop/views"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func parseNote(r *http.Request) (*models.Note, services.FormErrors) {
@@ -145,7 +146,7 @@ func HandleNoteDelete(noteService *models.NoteService) http.HandlerFunc {
 	})
 }
 
-func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService) http.HandlerFunc {
+func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
 	return ResourceHandler(t, func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error {
 		var updated *models.NoteResource
 		var err error
@@ -157,14 +158,25 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 				return err
 			}
 			updated, err = noteService.UpdateLabel(ctx, session.UserId, session.ResId, labelId)
+		} else if remindDateStr := r.PostFormValue("remind"); remindDateStr != "" {
+			inputRemindDate, err := time.Parse(time.DateOnly, remindDateStr)
+			if err != nil {
+				return err
+			}
+			updated, err = noteService.UpdateRemindDate(ctx, session.UserId, session.ResId, inputRemindDate)
 		} else {
 			err = errors.New("no form data")
 		}
+
+		if err != nil {
+			return err
+		}
+		labels, err := labelService.ListActiveOnly(ctx, session.UserId)
 		if err != nil {
 			return err
 		}
 
-		return vr.NoteUpdateBodySuccess(updated)
+		return vr.NoteUpdateBodySuccess(updated, labels)
 	})
 }
 
