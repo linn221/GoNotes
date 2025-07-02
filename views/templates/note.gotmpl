@@ -2,8 +2,19 @@
 <section id="main">
     <form hx-boost="false" id="export-form" action="/notes/export" method="POST" target="_blank">
     </form>
-    <a href="/notes/new" hx-boost="true" role="button">New</a>
-    <button type="submit" form="export-form" style="display: inline;">Export</button>
+    <nav>
+        <ul>
+            <li>
+                <a role="button" href="/notes/new" hx-boost="true">New</a>
+            </li>
+        </ul>
+        <ul>
+
+            <li>
+                <button type="submit" form="export-form">Export</button>
+            </li>
+        </ul>
+    </nav>
     <div id="contents">
         {{ range .ResList }}
         {{template "note" . }}
@@ -15,9 +26,9 @@
 
 {{define "note"}}
 
-<article id="note-{{.Id}}">
+<article id="note-{{.Id}}" x-data="{ showDetail: false, showInlineForm: false}">
     <header>
-        <h4>{{.Title}}</h4>
+        `{{.Title}}` at {{.CreatedAt}}
     </header>
 
     {{if not .RemindDate.IsZero}}
@@ -42,28 +53,26 @@
         <div></div>
     </div>
 
-    <strong>{{.Description}}</strong>
+    <i>{{.Description}}</i>
 
-    <div x-data="{ showDetail: false, showInlineForm: false}">
+    {{if .HasBody}}
+    <hr>
+    <div class="note-body">
+
         <div x-show="showDetail">
-            <md-block>
-                {{.Body}}
-            </md-block>
-            <button @click="showDetail = false;" class="secondary outline unstyled-button">less</button>
+            {{.Body}}
+            <button @click="showDetail = false;" class="link-like-button">less</button>
         </div>
 
         <div x-show="!showDetail">
             <div>
                 {{.BodyShort}}
                 {{if .ReadMoreRequired}}
-                    <button @click="showDetail = true;" class="link-like-button">...more</button>
+                <button @click="showDetail = true;" class="link-like-button">...more</button>
                 {{end}}
             </div>
         </div>
 
-        <div x-show="!showInlineForm">
-            <button @click="showInlineForm = true;" class="secondary outline">Inline Edit</button>
-        </div>
         <div x-show="showInlineForm">
             <form hx-patch="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
                 <label><strong>Edit Body</strong></label>
@@ -71,25 +80,25 @@
                     onfocus="autoResize(this)">{{.Body}}</textarea>
                 <div>
                     <button type="submit" class="secondary">Submit</button>
-                    <button type="button" @click="edit = false" class="contrast">Cancel</button>
                 </div>
             </form>
-            <button @click="showInlineForm = false;" class="secondary outline">close</button>
+            <button @click="showInlineForm = false;" style="display: block; width: 100%;">close</button>
         </div>
     </div>
+    <hr>
+    {{else}}
+        <br>
+    {{end}}
 
-    <small>Created At: <strong>{{.CreatedAt}}</strong></small>
-    <br>
-    <small>Updated At: <strong>{{.UpdatedAt}}</strong></small>
+    <!-- <small>Created At: <span class="semi-bold">{{.CreatedAt}}</span></small> -->
+    <small>Updated At: <span class="semi-bold">{{.UpdatedAt}}</span></small>
 
     <footer>
         <a href="/notes/{{.Id}}/edit" hx-boost="true" role="button" class="secondary">Edit</a>
         <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete" hx-target="#note-{{.Id}}"
             hx-confirm="Are you sure?">Delete</button>
+        <button x-show="!showInlineForm" @click="showInlineForm = true;" class="secondary outline">Edit Body</button>
     </footer>
 </article>
 
-{{end}}
-
-{{define "edit-body" }}
 {{end}}

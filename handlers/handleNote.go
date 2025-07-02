@@ -153,14 +153,14 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 		if body := r.PostFormValue("body"); body != "" {
 			updated, err = noteService.UpdateBody(r.Context(), session.UserId, session.ResId, body)
 		} else if labelIdStr := r.PostFormValue("label_id"); labelIdStr != "" {
-			labelId, err := strconv.Atoi(labelIdStr)
-			if err != nil {
-				return err
+			labelId, err2 := strconv.Atoi(labelIdStr)
+			if err2 != nil {
+				return err2
 			}
 			updated, err = noteService.UpdateLabel(ctx, session.UserId, session.ResId, labelId)
 		} else if remindDateStr := r.PostFormValue("remind"); remindDateStr != "" {
-			inputRemindDate, err := time.Parse(time.DateOnly, remindDateStr)
-			if err != nil {
+			inputRemindDate, err2 := time.Parse(time.DateOnly, remindDateStr) // to avoid err being shadowed
+			if err2 != nil {
 				return err
 			}
 			updated, err = noteService.UpdateRemindDate(ctx, session.UserId, session.ResId, inputRemindDate)

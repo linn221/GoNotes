@@ -190,7 +190,7 @@ type NoteSearchParam struct {
 }
 
 func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, error) {
-	notes, err := find[Note](s.db.WithContext(ctx), userId, "Label")
+	notes, err := find[Note](s.db.WithContext(ctx).Order("updated_at DESC"), userId, "Label")
 	if err != nil {
 		return nil, err
 	}
@@ -206,7 +206,7 @@ func (s *NoteService) ListNotes(ctx context.Context, userId int, param *NoteSear
 			dbCtx.Where("label_id = ?", param.LabelId)
 		}
 
-		err = dbCtx.Find(&notes).Error
+		err = dbCtx.Order("updated_at DESC").Find(&notes).Error
 	} else {
 		notes, err = s.listAllNotes(ctx, userId)
 	}
