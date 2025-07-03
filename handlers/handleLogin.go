@@ -56,8 +56,16 @@ func HandleLogin(vr *views.Templates,
 				return
 			}
 
-			token, err := newSessionToken(cache, user.Id)
-			if err != nil {
+			token := uuid.NewString()
+			// if err := cache.SetValue(fmt.Sprintf("Token:%s", tokenString), fmt.Sprint(userId), time.Hour*127); err != nil {
+			// 	return "", err
+			// }
+
+			// create and store session in Redis
+			if err := cache.SetH(fmt.Sprintf("Token:%s", token), map[string]any{
+				"userId":   user.Id,
+				"timezone": "Asia/Yangon", //2d get from client side js
+			}, time.Hour*127); err != nil {
 				finalErrHandle(w, err)
 				return
 			}
@@ -75,15 +83,6 @@ func HandleLogin(vr *views.Templates,
 			finalErrHandle(w, errors.New("invalid http method"))
 		}
 	}
-}
-
-func newSessionToken(cache services.CacheService, userId int) (string, error) {
-	tokenString := uuid.NewString()
-	if err := cache.SetValue(fmt.Sprintf("Token:%s", tokenString), fmt.Sprint(userId), time.Hour*127); err != nil {
-		return "", err
-	}
-
-	return tokenString, nil
 }
 
 func HandleLogout(cache services.CacheService) http.HandlerFunc {

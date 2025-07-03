@@ -61,7 +61,7 @@ func (rc *RedisCache) SetValue(key string, value string, exp time.Duration) erro
 }
 
 func (rc *RedisCache) RemoveKey(ck string) error {
-	_, err := rc.rdb.Del(rc.ctx, string(ck)).Result()
+	_, err := rc.rdb.Del(rc.ctx, ck).Result()
 	// if err == redis.Nil
 	return err
 }
@@ -96,6 +96,19 @@ func (rc *RedisCache) RemoveKeys(keys ...string) error {
 	}
 	_, err := rc.rdb.Del(rc.ctx, k...).Result()
 	return err
+}
+
+func (rc *RedisCache) SetH(key string, v map[string]any, exp time.Duration) error {
+	_, err := rc.rdb.TxPipelined(rc.ctx, func(pipe redis.Pipeliner) error {
+		pipe.HSet(rc.ctx, key, v)
+		pipe.Expire(rc.ctx, key, exp)
+		return nil
+	})
+	return err
+}
+
+func (rc *RedisCache) GetH(key string, field string) (string, error) {
+	return rc.rdb.HGet(rc.ctx, key, field).Result()
 }
 
 func ConnectRedis(ctx context.Context) *RedisCache {

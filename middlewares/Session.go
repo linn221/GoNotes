@@ -28,7 +28,6 @@ func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
 		// 	Domain:  "",
 		// })
 		http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
-		return
 	}
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -45,13 +44,9 @@ func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
 		}
 		token := cookies.Value
 		//2d check token length
-		val, ok, err := m.Cache.GetValue("Token:" + token)
+		val, err := m.Cache.GetH("Token:"+token, "userId")
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		if !ok {
-			respondInvalidSession(w, r)
 			return
 		}
 		userId, err := strconv.Atoi(val)

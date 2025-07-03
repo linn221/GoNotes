@@ -12,6 +12,7 @@ type inMemoryCache struct {
 	mu   sync.Mutex
 	data map[string]any
 	sets map[string]map[string]struct{}
+	hash map[string]map[string]string
 }
 
 func NewInMemoryCache() *inMemoryCache {
@@ -139,4 +140,42 @@ func (c *inMemoryCache) RemoveSetMember(setKey string, member string) error {
 		}
 	}
 	return nil
+}
+
+// SetH implements SetH(key, values, ttl) — ignore ttl
+func (c *inMemoryCache) SetH(key string, values map[string]any, _ time.Duration) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	if _, exists := c.hash[key]; !exists {
+		c.hash[key] = make(map[string]string)
+	}
+
+	for field, value := range values {
+		strVal, ok := value.(string)
+		if !ok {
+			return errors.New("SetH only supports string values")
+		}
+		c.hash[key][field] = strVal
+	}
+
+	return nil
+}
+
+// GetH implements GetH(key, field)
+func (c *inMemoryCache) GetH(key string, field string) (string, error) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+
+	fields, ok := c.hash[key]
+	if !ok {
+		return "", errors.New("key not found")
+	}
+
+	val, exists := fields[field]
+	if !exists {
+		return "", errors.New("field not found")
+	}
+
+	return val, nil
 }
