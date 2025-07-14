@@ -69,7 +69,7 @@ func ShowNoteEdit(t *views.Templates, noteService *models.NoteService, labelServ
 	})
 }
 
-func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
+func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(ctx context.Context) string) http.HandlerFunc {
 	parseSearchParam := func(r *http.Request) *models.NoteSearchParam {
 		var searchParam *models.NoteSearchParam
 		labelId, ok := getQueryInt(r, "label_id")
@@ -80,6 +80,7 @@ func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelSer
 	}
 	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
 		//parse search param
+		timezone := tz(ctx)
 		searchParam := parseSearchParam(r)
 		notes, err := noteService.ListNotes(ctx, session.UserId, searchParam)
 		if err != nil {
@@ -89,7 +90,7 @@ func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelSer
 		if err != nil {
 			return err
 		}
-		return vr.NoteIndexPage(notes, labels)
+		return vr.NoteIndexPage(notes, labels, timezone)
 	})
 }
 
@@ -146,7 +147,7 @@ func HandleNoteDelete(noteService *models.NoteService) http.HandlerFunc {
 	})
 }
 
-func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
+func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(context.Context) string) http.HandlerFunc {
 	return ResourceHandler(t, func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error {
 		var updated *models.NoteResource
 		var err error
@@ -176,7 +177,8 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 			return err
 		}
 
-		return vr.NoteUpdateBodySuccess(updated, labels)
+		timezone := tz(ctx)
+		return vr.NoteUpdateBodySuccess(updated, labels, timezone)
 	})
 }
 

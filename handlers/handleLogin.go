@@ -15,15 +15,17 @@ import (
 	"github.com/google/uuid"
 )
 
-func parseLoginForm(r *http.Request) (*models.User, services.FormErrors) {
+func parseLoginForm(r *http.Request) (*models.User, string, services.FormErrors) {
 	var input models.User
+	var timezone string
 	scans := [...]ScannerFunc{
 		newScannerFunc(r, "username", &input.Username, formscanner.StringRequired, formscanner.MinMax(4, 20)),
 		newScannerFunc(r, "password", &input.Password, formscanner.StringRequired, formscanner.MinMax(3, 20)),
+		newScannerFunc(r, "timezone", &timezone, formscanner.StringRequired),
 	}
 
 	m := runScanners(scans[:])
-	return &input, m
+	return &input, timezone, m
 }
 
 func HandleLogin(vr *views.Templates,
@@ -38,7 +40,7 @@ func HandleLogin(vr *views.Templates,
 			return
 		} else if r.Method == http.MethodPost {
 
-			input, errMap := parseLoginForm(r)
+			input, timezone, errMap := parseLoginForm(r)
 			if len(errMap) > 0 {
 				finalErrHandle(w,
 					vr.LoginFormWithErrors(w, input, errMap),
@@ -56,7 +58,7 @@ func HandleLogin(vr *views.Templates,
 				return
 			}
 
-			token, err := newSessionToken(cache, user.Id)
+			token, err := newSessionToken(cache, user.Id, timezone)
 			if err != nil {
 				finalErrHandle(w, err)
 				return
@@ -77,9 +79,12 @@ func HandleLogin(vr *views.Templates,
 	}
 }
 
-func newSessionToken(cache services.CacheService, userId int) (string, error) {
+func newSessionToken(cache services.CacheService, userId int, timezone string) (string, error) {
 	tokenString := uuid.NewString()
-	if err := cache.SetValue(fmt.Sprintf("Token:%s", tokenString), fmt.Sprint(userId), time.Hour*127); err != nil {
+	if err := cache.SetH(fmt.Sprintf("Token:%s", tokenString), map[string]any{
+		"timezone": timezone,
+		"userId":   userId,
+	}, time.Hour*127); err != nil {
 		return "", err
 	}
 

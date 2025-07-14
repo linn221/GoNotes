@@ -10,7 +10,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "/home/linn/taskman/cmd/web"
+            "program": "/home/linn/GoNotes/cmd/web"
         }
     ]
 }

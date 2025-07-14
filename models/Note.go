@@ -166,8 +166,8 @@ func (s *NoteService) ConvertToResource(note *Note) *NoteResource {
 		LabelId:     note.LabelId,
 		LabelName:   note.Label.Name,
 		RemindDate:  remindDate,
-		CreatedAt:   MyDateTime{note.CreatedAt},
-		UpdatedAt:   MyDateTime{note.UpdatedAt},
+		CreatedAt:   MyDateTime{note.CreatedAt.Local()},
+		UpdatedAt:   MyDateTime{note.UpdatedAt.Local()},
 	}
 	return &res
 }

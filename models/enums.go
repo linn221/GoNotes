@@ -20,12 +20,28 @@ func (t MyDateTime) DateString() string {
 	return t.Format("Jan 2")
 }
 
+func (t MyDateTime) LocalString(timezone string) string {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		panic(err)
+	}
+	return t.In(loc).Format("Jan 2 3:04 PM")
+}
+
 type MyDate struct {
 	time.Time
 }
 
 func (t MyDate) String() string {
 	return t.Format("Jan 2")
+}
+
+func (t MyDate) LocalString(timezone string) string {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		panic(err)
+	}
+	return t.In(loc).Format("Jan 2")
 }
 
 func (t MyDate) InputValue() string {

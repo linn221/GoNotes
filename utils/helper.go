@@ -101,6 +101,7 @@ func HashString(s string) string {
 }
 
 // ai generated one
+// 2d move to Services package as application related helper functions
 func GetClientIP(r *http.Request) string {
 	// Check X-Forwarded-For header (may contain multiple IPs)
 	if fwd := r.Header.Get("X-Forwarded-For"); fwd != "" {

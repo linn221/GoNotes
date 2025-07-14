@@ -9,12 +9,17 @@ type myContextKey string
 
 const (
 	userIdKey myContextKey = "userId"
-	token     myContextKey = "token"
+	tokenKey  myContextKey = "token"
 	isAuth    myContextKey = "isAuth"
 )
 
 func SetUserId(ctx context.Context, userId int) context.Context {
 	ctx = context.WithValue(ctx, userIdKey, userId)
+	return ctx
+}
+
+func SetToken(ctx context.Context, token string) context.Context {
+	ctx = context.WithValue(ctx, tokenKey, token)
 	return ctx
 }
 
@@ -24,6 +29,14 @@ func GetUserId(ctx context.Context) (int, error) {
 		return 0, errors.New("userId is required")
 	}
 	return userId, nil
+}
+
+func GetToken(ctx context.Context) (string, error) {
+	token, ok := ctx.Value(tokenKey).(string)
+	if !ok || token == "" {
+		return "", errors.New("token is required")
+	}
+	return token, nil
 }
 
 func IsAuth(ctx context.Context) bool {
