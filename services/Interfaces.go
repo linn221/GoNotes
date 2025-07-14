@@ -18,8 +18,8 @@ type CacheService interface {
 	RemoveSetMember(setKey string, member string) error
 	RemoveKeys(keys ...string) error
 
-	SetH(string, map[string]any, time.Duration) error
-	GetH(string, string) (string, error)
+	SetH(key string, v map[string]any, exp time.Duration) error
+	GetH(key string, field string) (string, error)
 }
 
 type HasIsActiveStatus interface {

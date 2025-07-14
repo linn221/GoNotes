@@ -24,12 +24,22 @@
             <label>Password</label>
             <input type="password" name="password">
 
+            <input type="hidden" name="timezone" id="timezone-input">
+
             <button type="submit">Login</button>
         </form>
         <a href="/register" hx-boost="true" role="button">Register</a>
     </div>
 </body>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        var tzInput = document.getElementById('timezone-input');
+        if (tzInput) tzInput.value = tz;
+        var tzInputError = document.getElementById('timezone-input-error');
+        if (tzInputError) tzInputError.value = tz;
+    });
+</script>
 </html>
 {{ end }}
 
@@ -47,6 +57,9 @@
         <small>{{.}}</small>
     {{ end }}
 
+    <input type="hidden" name="timezone" id="timezone-input-error">
+
     <button type="submit">Login</button>
 </form>
 {{ end }}
+

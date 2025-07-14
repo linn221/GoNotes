@@ -56,6 +56,7 @@ func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
 		}
 
 		ctx := myctx.SetUserId(r.Context(), userId)
+		ctx = myctx.SetToken(ctx, token)
 		ctx = myctx.SetAuth(ctx)
 		r = r.WithContext(ctx)
 

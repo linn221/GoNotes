@@ -1,9 +1,11 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"linn221/shop/handlers"
 	"linn221/shop/middlewares"
+	"linn221/shop/myctx"
 	"log"
 	"net/http"
 	"time"
@@ -34,14 +36,26 @@ func (app *App) Serve() {
 	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(myServices.LabelService))
 
 	//notes
+	getTimezone := func(ctx context.Context) string {
+		token, err := myctx.GetToken(ctx)
+		if err != nil {
+			return "UTC"
+		}
+		s, err := app.Cache.GetH(fmt.Sprintf("Token:%s", token), "timezone")
+		if err != nil {
+			return "UTC"
+		}
+		return s
+	}
+
 	authMux.HandleFunc("GET /notes/new", handlers.ShowNoteCreate(t, myServices.LabelService))
 	authMux.HandleFunc("GET /notes/{id}/edit", handlers.ShowNoteEdit(t, myServices.NoteService, myServices.LabelService))
-	authMux.HandleFunc("GET /notes", handlers.ShowNoteIndex(t, myServices.NoteService, myServices.LabelService))
+	authMux.HandleFunc("GET /notes", handlers.ShowNoteIndex(t, myServices.NoteService, myServices.LabelService, getTimezone))
 	authMux.HandleFunc("POST /notes", handlers.HandleNoteCreate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("POST /notes/export", handlers.HandleNoteExport(myServices.NoteService))
 	authMux.HandleFunc("GET /notes/import", handlers.ShowNoteImport(t))
 	authMux.HandleFunc("POST /notes/import", handlers.HandleNoteImport(myServices.NoteService))
-	authMux.HandleFunc("PATCH /notes/{id}", handlers.HandleNotePartialUpdate(t, myServices.NoteService, myServices.LabelService))
+	authMux.HandleFunc("PATCH /notes/{id}", handlers.HandleNotePartialUpdate(t, myServices.NoteService, myServices.LabelService, getTimezone))
 	authMux.HandleFunc("PUT /notes/{id}", handlers.HandleNoteUpdate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("DELETE /notes/{id}", handlers.HandleNoteDelete(myServices.NoteService))
 

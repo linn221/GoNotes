@@ -28,10 +28,14 @@ func (r *Renderer) NoteCreateError(input *models.Note, labels []models.Label, er
 	return r.templates.noteCreateTemplate.ExecuteTemplate(r.w, "create_form2", m)
 }
 
-func (r *Renderer) NoteUpdateBodySuccess(note *models.NoteResource, labels []models.Label) error {
+func (r *Renderer) NoteUpdateBodySuccess(note *models.NoteResource, labels []models.Label, timezone string) error {
 
-	noteData := newNoteData(note, labels)
-	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", noteData)
+	noteData := newNoteData(note)
+	return r.templates.noteTemplate.ExecuteTemplate(r.w, "note", map[string]any{
+		"Res":      noteData,
+		"Labels":   labels,
+		"Timezone": timezone,
+	})
 }
 
 func (r *Renderer) NoteEditForm(userId int, resId int, res *models.NoteResource, labels []models.Label) error {
@@ -67,26 +71,27 @@ type noteData struct {
 	Labels           []models.Label
 }
 
-func newNoteData(note *models.NoteResource, labels []models.Label) *noteData {
+func newNoteData(note *models.NoteResource) *noteData {
 	excerpt, readMoreRequired := utils.GenerateExcerpt(note.Body, 20)
 	return &noteData{
 		NoteResource:     note,
-		Labels:           labels,
 		BodyShort:        excerpt,
 		HasBody:          note.Body != "",
 		ReadMoreRequired: readMoreRequired,
 	}
 }
 
-func (r *Renderer) NoteIndexPage(notes []*models.NoteResource, labels []models.Label) error {
+func (r *Renderer) NoteIndexPage(notes []*models.NoteResource, labels []models.Label, timezone string) error {
 	noteCollection := make([]*noteData, 0, len(notes))
 	for _, note := range notes {
-		noteCollection = append(noteCollection, newNoteData(note, labels))
+		noteCollection = append(noteCollection, newNoteData(note))
 	}
 
 	return r.templates.noteTemplate.Execute(r.w, map[string]any{
 		"ResList":   noteCollection,
+		"Labels":    labels,
 		"PageTitle": "Notes",
+		"Timezone":  timezone,
 	})
 }
 
