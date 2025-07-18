@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/missing.css@1.1.3">
+</head>
+
+<body>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <header class="navbar">
+        <nav class="contents">
+            <ul role="list">
+                <li><a href="/notes">Notes</a></li>
+
+                <li><a href="/labels" aria-current="page">Labels</a></li>
+
+                <li><a href="/notes/import">Import Notes</a></li>
+
+                <li>
+                    <a href="/account">Account</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+
+    <main x-data="{tags: ['apple','orange']}">
+        <form method="post" class="box" style="display: grid; gap: 1rem; max-width: 600px;">
+            <label>
+                Title
+            </label>
+            <input type="text" name="title" required>
+
+            <label>
+                Body
+            </label>
+            <textarea name="body" rows="6" required></textarea>
+
+            <label>
+                Category
+            </label>
+            <select name="category" required>
+                <option value="">-- Choose a category --</option>
+                <option value="personal">Personal</option>
+                <option value="work">Work</option>
+                <option value="archive">Archive</option>
+            </select>
+
+            <label>
+                Remind Date
+            </label>
+            <input type="date" name="" id="">
+            <div class="flex-row">
+                <template x-for="tag in tags">
+                    <chip x-text="tag"></chip>
+                </template>
+            </div>
+            <input type="text" list="fruits"
+            @keyup.enter="tags.push($event.target.value); $event.target.value = ''"
+            @keyup.space="tags.push($event.target.value); $event.target.value = ''"
+            >
+            <datalist id="fruits">
+                <option value="Apple">
+                <option value="Banana">
+                <option value="Cherry">
+                <option value="Date">
+            </datalist>
+
+            <div style="display: flex;">
+                <button class="primary" style="margin-inline-start: auto;">Create</button>
+            </div>
+        </form>
+    </main>
+
+</body>
+
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://unpkg.com/missing.css@1.1.3">
+    <style>
+        @keyframes fadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            80% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+                display: none;
+            }
+        }
+
+        .auto-dismiss {
+            animation: fadeOut 4s forwards;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="navbar">
+        <nav class="contents">
+            <ul role="list">
+                <li><a href="/notes">Notes</a></li>
+
+                <li><a href="/labels" aria-current="page">Labels</a></li>
+
+                <li><a href="/notes/import">Import Notes</a></li>
+
+                <li>
+                    <a href="/account">Account</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div class="box bad auto-dismiss" id="flash">
+            <strong class="block titlebar">Error</strong>
+            Task failed successfully
+        </div>
+
+        <div class="box ok auto-dismiss" id="flash">
+            <strong class="block titlebar">Success</strong>
+            Task failed successfully
+        </div>
+
+
+        <div style="text-align: right;">
+            <strong><button class="big">New</button></strong>
+        </div>
+        <details>
+            <summary>Hello World</summary>
+            hello fucking workd
+
+            <p role=toolbar>
+                <button type=button>Cut</button>
+                <button type=button>Copy</button>
+                <button type=button>Paste</button>
+            </p>
+        </details>
+
+        <details>
+            <summary>Hello World</summary>
+            hello fucking workd
+
+            <p role=toolbar>
+                <button>Cut</button>
+                <button>Copy</button>
+                <button>Paste</button>
+            </p>
+        </details>
+        <dialog>
+            <h1 class="titlebar">Dialog</h1>
+            <p>Please confirm that you have opened this dialog.</p>
+            <button onclick="document.querySelectorAll('dialog')[0].close()">Close</button>
+        </dialog>
+        <form class="box rows">
+            <p><label for="inp">Name</label>
+                <input id="inp" name="title">
+            </p>
+            <p><label>Description</label> <textarea name="description"></textarea></p>
+
+            <p style="text-align: right;">
+                <span></span>
+                <button>Update</button>
+            </p>
+        </form>
+
+        <form class="box rows">
+            <p>
+                <label for="inp">Name</label>
+                <input class="bad" id="inp" name="title" value="ab">
+                <span class="color bad"><i>hello world</i></span>
+            </p>
+            <p>
+                <label>Description</label>
+                <textarea name="description" class="ok">hello wrold</textarea>
+            </p>
+            <p style="text-align: right;">
+                <span></span>
+                <button>Update</button>
+            </p>
+        </form>
+
+        <form class="box rows">
+            <p>
+                <label for="inp">Name</label>
+                <input class="bad" id="inp" name="title" value="ab">
+                <span class="color bad"><i>hello world</i></span>
+            </p>
+            <p>
+                <label>Description</label>
+                <textarea name="description" class="ok">hello wrold</textarea>
+            </p>
+            <p style="text-align: right;">
+                <span></span>
+                <button>Create</button>
+            </p>
+        </form>
+</body>
+
+</html>
