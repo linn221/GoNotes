@@ -1,169 +1,101 @@
 {{define "main"}}
 <section id="main">
-    <button hx-get="/labels/new" hx-target="#create-view"
-    >New</button>
+    <div style="text-align: right;">
+        <strong><button class="big" hx-get="/labels/new" hx-target="#create-view">New</button></strong>
+    </div>
 
-    <table>
-        <thead>
-            <th>Name</th>
-            <th>Actions</th>
-        </thead>
-        <tbody id="contents">
-            {{ range .ResList }}
-                {{template "row" .}}
-            {{end}}
-        </tbody>
-    </table>
+    <div id="contents">
+        {{ range .ResList }}
+        {{template "row" .}}
+        {{end}}
+    </div>
 
-    <div id="create-view"
-    hx-on::after-swap="myscroll('#create-view')"
-    ></div>
-    <div id="edit-view"
-    hx-on::after-swap="myscroll('#edit-view')"
-    ></div>
+    <div id="create-view" hx-on::after-swap="myscroll('#create-view')"></div>
+    <div id="edit-view" hx-on::after-swap="myscroll('#edit-view')"></div>
 
 </section>
 {{end}}
 
 {{ define "row" }}
-    <tr id="row-{{.Id}}">
-        <td>
-        {{if .Description}}
-        <details>
-            <summary>{{template "label_name" .}}</summary>
-            {{.Description}}
-        </details>
-        {{else}}
-            {{template "label_name" .}}
-        {{end}}
-        </td>
-        <td>
-            <a href="/notes/new?label_id={{.Id}}" role="button">New Note</a>
-            <button hx-get="/labels/{{.Id}}/edit" hx-target="#edit-view"
-            >Edit</button>
-            {{template "toggle_button" .}}
-            <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}"
-            class="contrast"
-            hx-swap="delete" hx-confirm="Are you sure?">Delete</button>
-        </td>
-    </tr>
+<details id="row-{{.Id}}">
+    <summary>{{.Name}}</summary>
+    {{.Description}}
+
+    <p role="toolbar">
+        <button hx-get="/labels/{{.Id}}/edit" hx-target="#edit-view">Edit</button>
+        {{template "toggle_button" .}}
+        <button hx-delete="/labels/{{.Id}}" hx-target="#row-{{.Id}}" hx-swap="delete"
+            hx-confirm="Are you sure?">Delete</button>
+        <a href="/notes/new?label_id={{.Id}}" role="button" class="button">New Note</a>
+    </p>
+</details>
 {{end}}
 
-{{define "label_name"}}
-    <a href="/notes?label_id={{.Id}}">{{.Name}}</a>
-{{end}}
-
-{{define "toggle_button" }}
+{{define "toggle_button"}}
 {{if .IsActive}}
-    <button
-    id="toggle-button-{{.Id}}"
-    hx-post="/labels/{{.Id}}/toggle?status=false"
-    class="secondary"
-    hx-swap="outerHTML">Toggle INactive</button>
+<button id="toggle-button-{{.Id}}" hx-post="/labels/{{.Id}}/toggle?status=false" hx-swap="outerHTML">Toggle
+    INactive</button>
 {{else}}
-    <button
-    id="toggle-button-{{.Id}}"
-    hx-post="/labels/{{.Id}}/toggle?status=true"
-    class="secondary"
-    hx-swap="outerHTML"><u>Toggle Active</u></button>
+<button id="toggle-button-{{.Id}}" hx-post="/labels/{{.Id}}/toggle?status=true" hx-swap="outerHTML"><u>Toggle
+        Active</u></button>
 {{end}}
 {{end}}
-
 {{ define "create_form" }}
-<form hx-post="/labels"
-    id="create-form"
-    hx-target="#contents"
-    hx-swap="afterbegin"
-    >
-    <label>Name</label>
-    <input type="text" name="name">
+<form hx-post="/labels" id="create-form" hx-target="#contents" hx-swap="afterbegin" class="box rows">
+    <p>
+        <label>Name</label>
+        <input type="text" name="name">
+    </p>
 
-    <label>Description</label>
-    <textarea name="description"></textarea>
+    <p>
+        <label>Description</label>
+        <textarea name="description"></textarea>
+    </p>
 
-    <button type="submit">Create</button>
-    <button type="button" onclick="$('#create-form').remove(); scrolltomain()">Close</button>
+    <p style="text-align: right;">
+
+        <span></span>
+        <button type="submit">Create</button>
+    </p>
+    <p style="text-align: right;">
+        <span></span>
+        <button type="button" onclick="$('#create-form').remove(); scrolltomain()">Close</button>
+    </p>
 </form>
 {{end}}
 
 {{ define "create_success" }}
-    {{template "row" .Res }}
-    <div id="create-view" hx-swap-oob="true"
-    hx-on::after-swap="myscroll('#create-view')"></div>
-{{end}}
-
-{{ define "create_form2" }}
-    <form hx-post="/labels"
-    id="create-form"
-    hx-target="#contents"
-    hx-swap="afterbegin"
-    >
-        
-        <label>Name</label>
-        <input type="text" name="name" aria-invalid="{{.name.Invalid}}" value="{{.name.Vlu}}">
-        {{with .name.Err}}
-            <small>{{.}}</small>
-        {{end}}
-
-        <label>Description</label>
-        <textarea name="description" aria-invalid="{{.description.Invalid}}">{{.description.Vlu}}</textarea>
-        {{with .description.Err}}
-            <small>{{.}}</small>
-        {{end}}
-
-        <button type="submit">Create</button>
-        <button type="button" onclick="$('#create-form').remove(); scrolltomain()">Close</button>
-    </form>
+{{template "row" .Res }}
+<div id="create-view" hx-swap-oob="true" hx-on::after-swap="myscroll('#create-view')"></div>
 {{end}}
 
 {{define "edit_form"}}
-<form hx-put="/labels/{{.Id}}"
-id="edit-form"
-hx-target="#row-{{.Id}}"
-hx-swap="outerHTML"
->
+<form hx-put="/labels/{{.Id}}" id="edit-form" hx-target="#row-{{.Id}}" hx-swap="outerHTML" class="box rows">
 
-<label>Name</label>
-<input type="text" name="name" value="{{.Res.Name}}">
+    <p>
+        <label>Name</label>
+        <input type="text" name="name" value="{{.Res.Name}}">
+    </p>
 
-<label>Description</label>
-<textarea name="description">{{.Res.Description}}</textarea>
+    <p>
+        <label>Description</label>
+        <textarea name="description">{{.Res.Description}}</textarea>
+    </p>
 
-<button type="submit">Update</button>
+    <p style="text-align: right;">
+        <span></span>
+        <button type="submit">Update</button>
+    </p>
 
-
-<button type="button" onclick="$('#edit-form').remove(); scrolltomain()">Close</button>
+    <p style="text-align: right;">
+        <span></span>
+        <button type="button" onclick="$('#edit-form').remove(); scrolltomain()">Close</button>
+    </p>
 
 </form>
 {{end}}
 
 {{define "edit_success"}}
-    {{template "row" .Res}}
-    <div id="edit-view" hx-swap-oob="true"
-	hx-on::after-swap="myscroll('#edit-view')"></div>
-{{end}}
-
-{{define "edit_form2"}}
-    <form hx-put="/labels/{{.Id}}"
-    id="edit-form"
-    hx-target="#row-{{.Id}}"
-    hx-swap="outerHTML"
-    >
-
-    <label>Name</label>
-    <input type="text" name="name" value="{{.name.Vlu}}" aria-invalid="{{.name.Invalid}}">
-    {{with .name.Err}}
-        <small>{{.}}</small>
-    {{end}}
-
-    <label>Description</label>
-    <textarea name="description" aria-invalid="{{.description.Invalid}}">{{.description.Vlu}}</textarea>
-    {{with .description.Err}}
-        <small>{{.}}</small>
-    {{end}}
-
-    <button type="submit">Update</button>
-    <button type="button" onclick="$('#edit-form').remove(); scrolltomain()">Close</button>
-
-    </form>
+{{template "row" .Res}}
+<div id="edit-view" hx-swap-oob="true" hx-on::after-swap="myscroll('#edit-view')"></div>
 {{end}}

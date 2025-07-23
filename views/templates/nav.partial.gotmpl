@@ -1,22 +1,17 @@
 {{ define "nav" }}
-<nav>
-  <ul>
-    <li><a href="/notes" hx-boost="true">Notes</a></li>
-    <li><a href="/labels" hx-boost="true">Labels</a></li>
-    <li><a href="/notes/import">Import Notes</a></li>
-  </ul>
-  <ul>
-    <li>
-      <details class="dropdown">
-        <summary>
-          Account
-        </summary>
-        <ul dir="rtl">
-          <li><a href="/change-password">Change Password</a></li>
-          <li hx-post="/logout" style="cursor: pointer;">Logout</li>
-        </ul>
-      </details>
-    </li>
-  </ul>
-</nav>
+    <header class="navbar">
+        <nav class="contents">
+            <ul role="list">
+                <li><a href="/notes">Notes</a></li>
+
+                <li><a href="/labels" aria-current="page">Labels</a></li>
+
+                <li><a href="/notes/import">Import Notes</a></li>
+
+                <li>
+                    <a href="/account">Account</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
 {{end}}

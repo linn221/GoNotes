@@ -4,28 +4,46 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    {{with .PageTitle}}
-      <title>{{.}}</title>
-    {{else}}
-      <title>Go + HTMX App</title>
-    {{end}}
-    <link rel="stylesheet" href="/static/css/pico.min.css">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <script src="/static/js/alpine.js" defer></script>
-    <script src="/static/js/htmx.min.js" defer></script>
-    <script src="/static/js/helper.js" defer></script>
-    <script type="module" src="https://md-block.verou.me/md-block.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  {{with .PageTitle}}
+  <title>{{.}}</title>
+  {{else}}
+  <title>Go + HTMX App</title>
+  {{end}}
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="/static/js/alpine.js" defer></script>
+  <script src="/static/js/htmx.min.js" defer></script>
+  <script src="/static/js/helper.js" defer></script>
+  <link rel="stylesheet" href="https://unpkg.com/missing.css@1.1.3">
+  <style>
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        display: none;
+      }
+    }
+
+    .auto-dismiss {
+      animation: fadeOut 4s forwards;
+    }
+  </style>
 </head>
 
 <body hx-boost="true">
-    <div class="container">
-        <div id="alert-container"></div>
-        {{ template "nav" }}
-
-        {{ template "main" . }}
-    </div>
+  {{template "nav" .}}
+  <main>
+    <div id="flash"></div>
+    {{template "main" .}}
+  </main>
 </body>
 
 </html>

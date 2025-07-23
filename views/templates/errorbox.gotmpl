@@ -1,0 +1,17 @@
+{{define "flash"}}
+<div id="flash"></div>
+{{end}}
+
+{{define "error"}}
+<div class="box bad auto-dismiss" id="flash">
+    <strong class="block titlebar">{{with .Title}}{{.}}{{else}}Error{{end}}</strong>
+    {{.Message}}
+</div>
+{{end}}
+
+{{define "success"}}
+<div class="box ok auto-dismiss" id="flash">
+    <strong class="block titlebar">Success</strong>
+    {{.Message}}
+</div>
+{{end}}
