@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"linn221/shop/myctx"
 	"linn221/shop/services"
 	"linn221/shop/views"
@@ -42,7 +43,9 @@ func DefaultHandler(t *views.Templates, handle DefaultHandlerFunc) http.HandlerF
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, err),
+			)
 			return
 		}
 
@@ -54,7 +57,9 @@ func DefaultHandler(t *views.Templates, handle DefaultHandlerFunc) http.HandlerF
 
 		err = handle(ctx, r, &session, renderer)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowDefaultError(t, w, err),
+			)
 			return
 		}
 	}
@@ -72,18 +77,24 @@ func ResourceHandler(t *views.Templates, handle ResourceHandlerFunc) http.Handle
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, err),
+			)
 			return
 		}
 
 		resIdStr := r.PathValue("id")
 		if resIdStr == "" {
-			http.Error(w, "resource id is required", http.StatusBadRequest)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("path id is required")),
+			)
 			return
 		}
 		resId, err := strconv.Atoi(resIdStr)
 		if err != nil {
-			http.Error(w, "resource id is required", http.StatusBadRequest)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("resource id is required")),
+			)
 			return
 
 		}
@@ -95,7 +106,9 @@ func ResourceHandler(t *views.Templates, handle ResourceHandlerFunc) http.Handle
 
 		err = handle(ctx, r, &session, renderer)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowDefaultError(t, w, err),
+			)
 			return
 		}
 	}
@@ -103,30 +116,38 @@ func ResourceHandler(t *views.Templates, handle ResourceHandlerFunc) http.Handle
 
 type DeleteHandlerFunc func(ctx context.Context, r *http.Request, userId int, resId int) error
 
-func DeleteHandler(handle DeleteHandlerFunc) http.HandlerFunc {
+func DeleteHandler(t *views.Templates, handle DeleteHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, err),
+			)
 			return
 		}
 
 		resIdStr := r.PathValue("id")
 		if resIdStr == "" {
-			http.Error(w, "resource id is required", http.StatusBadRequest)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("resource id is required")),
+			)
 			return
 		}
 		resId, err := strconv.Atoi(resIdStr)
 		if err != nil {
-			http.Error(w, "resource id is required", http.StatusBadRequest)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("resource id is required")),
+			)
 			return
 
 		}
 
 		err = handle(ctx, r, userId, resId)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowDefaultError(t, w, err),
+			)
 			return
 		}
 	}
@@ -134,13 +155,15 @@ func DeleteHandler(handle DeleteHandlerFunc) http.HandlerFunc {
 
 func CreateHandler[T any](t *views.Templates,
 	parseInput func(*http.Request) (*T, services.FormErrors),
-	handle func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *T, fe services.FormErrors, vr *views.Renderer) error,
+	handle func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *T, vr *views.Renderer) error,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("user id is required")),
+			)
 			return
 		}
 
@@ -150,10 +173,19 @@ func CreateHandler[T any](t *views.Templates,
 
 		renderer := t.NewRenderer(w, userId)
 		input, ferrs := parseInput(r)
+		if len(ferrs) > 0 {
+			finalErrHandle(
+				w,
+				views.ShowFormError(t, w, ferrs),
+			)
+			return
+		}
 
-		err = handle(w, r, &session, input, ferrs, renderer)
+		err = handle(w, r, &session, input, renderer)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowDefaultError(t, w, err),
+			)
 			return
 		}
 	}
@@ -161,24 +193,30 @@ func CreateHandler[T any](t *views.Templates,
 
 func UpdateHandler[T any](t *views.Templates,
 	parseInput func(r *http.Request) (*T, services.FormErrors),
-	handle func(w http.ResponseWriter, r *http.Request, session *Session, input *T, fe services.FormErrors, renderer *views.Renderer) error,
+	handle func(w http.ResponseWriter, r *http.Request, session *Session, input *T, renderer *views.Renderer) error,
 ) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		ctx := r.Context()
 		userId, err := myctx.GetUserId(ctx)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("user id is required")),
+			)
 			return
 		}
 
 		resIdStr := r.PathValue("id")
 		if resIdStr == "" {
-			http.Error(w, "resource id is required", http.StatusBadRequest)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("resource id is required")),
+			)
 			return
 		}
 		resId, err := strconv.Atoi(resIdStr)
 		if err != nil {
-			http.Error(w, "resource id is required", http.StatusBadRequest)
+			finalErrHandle(w,
+				views.ShowInternalError(t, w, errors.New("resource id is required")),
+			)
 			return
 
 		}
@@ -189,10 +227,19 @@ func UpdateHandler[T any](t *views.Templates,
 
 		renderer := t.NewRenderer(w, userId)
 		input, ferrs := parseInput(r)
+		if len(ferrs) > 0 {
+			finalErrHandle(
+				w,
+				views.ShowFormError(t, w, ferrs),
+			)
+			return
+		}
 
-		err = handle(w, r, &session, input, ferrs, renderer)
+		err = handle(w, r, &session, input, renderer)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			finalErrHandle(w,
+				views.ShowDefaultError(t, w, err),
+			)
 			return
 		}
 	}

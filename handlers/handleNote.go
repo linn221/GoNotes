@@ -96,14 +96,7 @@ func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelSer
 
 func HandleNoteCreate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
 
-	return CreateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Note, fe services.FormErrors, vr *views.Renderer) error {
-		if len(fe) > 0 {
-			labels, err := labelService.ListActiveOnly(r.Context(), session.UserId)
-			if err != nil {
-				return err
-			}
-			return vr.NoteCreateError(input, labels, fe)
-		}
+	return CreateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Note, vr *views.Renderer) error {
 		if input.Description == "" {
 			input.Description = input.Title
 		}
@@ -118,15 +111,7 @@ func HandleNoteCreate(t *views.Templates, noteService *models.NoteService, label
 }
 
 func HandleNoteUpdate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
-	return UpdateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Note, fe services.FormErrors, renderer *views.Renderer) error {
-		if len(fe) > 0 {
-			labels, err := labelService.ListActiveOnly(r.Context(), session.UserId)
-			if err != nil {
-				return err
-			}
-
-			return renderer.NoteEditError(session.UserId, session.ResId, input, fe, labels)
-		}
+	return UpdateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Note, renderer *views.Renderer) error {
 		_, err := noteService.Update(r.Context(), session.UserId, session.ResId, input)
 		if err != nil {
 			return err
@@ -136,8 +121,8 @@ func HandleNoteUpdate(t *views.Templates, noteService *models.NoteService, label
 	})
 }
 
-func HandleNoteDelete(noteService *models.NoteService) http.HandlerFunc {
-	return DeleteHandler(func(ctx context.Context, r *http.Request, userId, resId int) error {
+func HandleNoteDelete(t *views.Templates, noteService *models.NoteService) http.HandlerFunc {
+	return DeleteHandler(t, func(ctx context.Context, r *http.Request, userId, resId int) error {
 		_, err := noteService.Delete(ctx, userId, resId)
 		if err != nil {
 			return err

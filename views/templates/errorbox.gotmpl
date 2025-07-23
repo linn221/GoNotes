@@ -9,9 +9,20 @@
 </div>
 {{end}}
 
+{{define "form_error"}}
+<div class="box bad auto-dismiss" id="flash">
+    <strong class="block titlebar">Form Error</strong>
+    {{ range $k, $v := .ErrorMap }}
+    "{{$k}}": {{$v}}
+    <br>
+    {{end}}
+</div>
+{{end}}
+
 {{define "success"}}
-<div class="box ok auto-dismiss" id="flash">
+<div class="box ok auto-dismiss" id="flash" >
     <strong class="block titlebar">Success</strong>
     {{.Message}}
+    <script>myscroll('#flash')</script>
 </div>
 {{end}}

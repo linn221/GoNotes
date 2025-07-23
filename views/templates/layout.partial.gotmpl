@@ -42,8 +42,18 @@
   {{template "nav" .}}
   <main>
     <div id="flash"></div>
+    <div id="alert-container"></div>
+
     {{template "main" .}}
   </main>
+  <script>
+    document.body.addEventListener("htmx:afterSwap", function (e) {
+      const el = e.detail.target;
+      if (el && el.id) {
+        myscroll(`#${el.id}`);
+      }
+    });
+  </script>
 </body>
 
 </html>
