@@ -18,6 +18,7 @@ type Templates struct {
 	noteEditTemplate       *template.Template
 	importNoteTemplate     *template.Template
 	changePasswordTemplate *template.Template
+	accountTemplate        *template.Template
 
 	// internalErrorTemplate  *template.Template //2d
 	// notFoundTemplate       *template.Template //2d
@@ -53,6 +54,7 @@ func NewTemplates(templateDir string) *Templates {
 		noteCreateTemplate:     parsePage("note-create.gotmpl"),
 		noteEditTemplate:       parsePage("note-edit.gotmpl"),
 		importNoteTemplate:     parsePage("import-notes.gotmpl"),
+		accountTemplate:        parsePage("account-actions.gotmpl"),
 	}
 }
 

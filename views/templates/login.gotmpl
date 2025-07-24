@@ -7,59 +7,74 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Go + HTMX App</title>
-    <link rel="stylesheet" href="/static/css/pico.min.css">
     <link rel="stylesheet" href="/static/css/style.css">
     <script src="/static/js/alpine.js" defer></script>
     <script src="/static/js/htmx.min.js" defer></script>
     <script src="/static/js/helper.js" defer></script>
+    <link rel="stylesheet" href="https://unpkg.com/missing.css@1.1.3">
+  <style>
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+
+      80% {
+        opacity: 1;
+      }
+
+      100% {
+        opacity: 0;
+        display: none;
+      }
+    }
+
+    .auto-dismiss {
+      animation: fadeOut 4s forwards;
+    }
+  </style>
 </head>
 
 <body>
+    <div id="flash"></div>
+    <div id="alert-container"></div>
     <div class="container">
         <h3>Login</h3>
-        <form hx-post="/login" hx-swap="outerHTML">
-            <label>Username</label>
-            <input type="text" placeholder="name" name="username">
-
-            <label>Password</label>
-            <input type="password" name="password">
-
+        <form hx-post="/login" hx-swap="outerHTML" class="box rows">
             <input type="hidden" name="timezone" id="timezone-input">
+            <p>
+                <label>Username</label>
+                <input type="text" name="username">
+            </p>
 
-            <button type="submit">Login</button>
+            <p>
+
+                <label>Password</label>
+                <input type="password" name="password">
+            </p>
+            <p>
+                <span></span>
+
+                <button type="submit">Login</button>
+            </p>
         </form>
         <a href="/register" hx-boost="true" role="button">Register</a>
     </div>
 </body>
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
         var tzInput = document.getElementById('timezone-input');
         if (tzInput) tzInput.value = tz;
         var tzInputError = document.getElementById('timezone-input-error');
         if (tzInputError) tzInputError.value = tz;
     });
+    document.body.addEventListener("htmx:afterSwap", function (e) {
+      const el = e.detail.target;
+      if (el && el.id) {
+        myscroll(`#${el.id}`);
+      }
+    });
 </script>
+
 </html>
 {{ end }}
-
-{{ define "error_view" }}
-<form hx-post="/login" hx-swap="outerHTML">
-    <input type="text" placeholder="name" name="username" value="{{.username.Vlu}}"
-    aria-invalid="{{ .username.Invalid }}">
-    {{ with .username.Err }}
-        <small>{{ . }}</small>
-    {{ end }}
-
-    <input type="password" name="password" placeholder="password" value="{{.password.Vlu}}"
-        aria-invalid="{{ .password.Invalid }}">
-    {{ with .password.Err }}
-        <small>{{.}}</small>
-    {{ end }}
-
-    <input type="hidden" name="timezone" id="timezone-input-error">
-
-    <button type="submit">Login</button>
-</form>
-{{ end }}
-

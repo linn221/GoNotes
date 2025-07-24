@@ -2,14 +2,20 @@
     <header class="navbar">
         <nav class="contents">
             <ul role="list">
-                <li><a href="/notes">Notes</a></li>
+                <li><a href="/notes"
+                    {{if eq .Nav "notes"}}aria-current="page"{{end}}
+                    >Notes</a></li>
 
-                <li><a href="/labels" aria-current="page">Labels</a></li>
+                <li><a href="/labels"
+                    {{if eq .Nav "labels"}}aria-current="page"{{end}}
+                    >Labels</a></li>
 
                 <li><a href="/notes/import">Import Notes</a></li>
 
                 <li>
-                    <a href="/account">Account</a>
+                    <a href="/account"
+                    {{if eq .Nav "account"}}aria-current="page"{{end}}
+                    >Account</a>
                 </li>
             </ul>
         </nav>

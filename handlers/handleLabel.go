@@ -41,7 +41,7 @@ func ShowLabelEdit(t *views.Templates, labelService *models.LabelService) http.H
 	return ResourceHandler(t, h)
 }
 
-func ShowLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
+func PageLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
 		results, err := labelService.ListAll(r.Context(), session.UserId)
 		if err != nil {

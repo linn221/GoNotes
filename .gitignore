@@ -2,4 +2,5 @@
 shop
 coffee.txt
 gorm.log
+tmp
 __debug*

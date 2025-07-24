@@ -27,7 +27,7 @@ func (app *App) Serve() {
 	authMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/labels", http.StatusPermanentRedirect)
 	})
-	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(t, myServices.LabelService))
+	authMux.HandleFunc("GET /labels", handlers.PageLabelIndex(t, myServices.LabelService))
 	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(t))
 	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(t, myServices.LabelService))
 	authMux.HandleFunc("POST /labels/{id}/toggle", handlers.HandleLabelToggleActive(t, myServices.LabelService))
@@ -58,6 +58,9 @@ func (app *App) Serve() {
 	authMux.HandleFunc("PATCH /notes/{id}", handlers.HandleNotePartialUpdate(t, myServices.NoteService, myServices.LabelService, getTimezone))
 	authMux.HandleFunc("PUT /notes/{id}", handlers.HandleNoteUpdate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("DELETE /notes/{id}", handlers.HandleNoteDelete(t, myServices.NoteService))
+	authMux.HandleFunc("GET /account", func(w http.ResponseWriter, r *http.Request) {
+		t.AccountPage(w)
+	})
 
 	mainMux := http.NewServeMux()
 	// public routes

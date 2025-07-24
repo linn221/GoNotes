@@ -91,6 +91,7 @@ func (r *Renderer) NoteIndexPage(notes []*models.NoteResource, labels []models.L
 		"ResList":   noteCollection,
 		"Labels":    labels,
 		"PageTitle": "Notes",
+		"Nav":       NavNotes,
 		"Timezone":  timezone,
 	})
 }

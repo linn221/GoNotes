@@ -53,8 +53,9 @@ func (r *Renderer) LabelToggleButton(label *models.Label) error {
 
 func (r *Renderer) LabelIndexPage(labels []models.Label) error {
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "root", map[string]any{
-		"ResList": labels,
+		"ResList":   labels,
 		"PageTitle": "Labels",
+		"Nav":       NavLabels,
 	})
 }
 

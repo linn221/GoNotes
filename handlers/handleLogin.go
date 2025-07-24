@@ -43,7 +43,7 @@ func HandleLogin(vr *views.Templates,
 			input, timezone, errMap := parseLoginForm(r)
 			if len(errMap) > 0 {
 				finalErrHandle(w,
-					vr.LoginFormWithErrors(w, input, errMap),
+					views.ShowFormError(vr, w, errMap),
 				)
 				return
 			}
@@ -51,9 +51,11 @@ func HandleLogin(vr *views.Templates,
 			user, err := userService.Login(r.Context(), input.Username, input.Password)
 			if err != nil {
 				finalErrHandle(w,
-					vr.LoginFormWithErrors(w, input, services.FormErrors{
+					views.ShowFormError(vr, w, services.FormErrors{
 						"username": errors.New("invalid username/password"),
-						"password": errors.New("invalid username/password")}),
+						"password": errors.New("invalid username/password"),
+					},
+					),
 				)
 				return
 			}
