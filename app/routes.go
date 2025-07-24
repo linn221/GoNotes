@@ -50,7 +50,7 @@ func (app *App) Serve() {
 
 	authMux.HandleFunc("GET /notes/new", handlers.ShowNoteCreate(t, myServices.LabelService))
 	authMux.HandleFunc("GET /notes/{id}/edit", handlers.ShowNoteEdit(t, myServices.NoteService, myServices.LabelService))
-	authMux.HandleFunc("GET /notes", handlers.ShowNoteIndex(t, myServices.NoteService, myServices.LabelService, getTimezone))
+	authMux.HandleFunc("GET /notes", handlers.RenderNoteIndex(t, myServices.NoteService, myServices.LabelService, getTimezone))
 	authMux.HandleFunc("POST /notes", handlers.HandleNoteCreate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("POST /notes/export", handlers.HandleNoteExport(myServices.NoteService))
 	authMux.HandleFunc("GET /notes/import", handlers.ShowNoteImport(t))

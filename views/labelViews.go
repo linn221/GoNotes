@@ -2,20 +2,10 @@ package views
 
 import (
 	"linn221/shop/models"
-	"linn221/shop/services"
 )
 
 func (r *Renderer) LabelCreateForm() error {
 	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_form", nil)
-}
-
-func (r *Renderer) LabelCreateError(input *models.Label, errmap services.FormErrors) error {
-
-	m := map[string]FormInput{
-		"name":        NewFormInput(input.Name, errmap["name"]),
-		"description": NewFormInput(input.Description, errmap["description"]),
-	}
-	return r.templates.labelTemplate.ExecuteTemplate(r.w, "create_form2", m)
 }
 
 func (r *Renderer) LabelCreateOk(label *models.Label) error {
@@ -35,16 +25,6 @@ func (r *Renderer) LabelEditForm(resId int, input *models.Label) error {
 		"Res": input,
 		"Id":  resId,
 	})
-}
-
-func (r *Renderer) LabelUpdateError(resId int, input *models.Label, errMap services.FormErrors) error {
-
-	m := map[string]any{
-		"Id":          resId,
-		"name":        NewFormInput(input.Name, errMap["name"]),
-		"description": NewFormInput(input.Description, errMap["description"]),
-	}
-	return r.templates.labelTemplate.ExecuteTemplate(r.w, "edit_form2", m)
 }
 
 func (r *Renderer) LabelToggleButton(label *models.Label) error {

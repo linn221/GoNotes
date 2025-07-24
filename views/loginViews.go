@@ -23,6 +23,7 @@ func (r *Templates) RegisterFormWithErrors(w http.ResponseWriter, input *models.
 	}
 	return r.registerTemplate.ExecuteTemplate(w, "error_view", data)
 }
+
 func (r *Templates) RegisterPage(w http.ResponseWriter) error {
 	return r.registerTemplate.Execute(w, nil)
 }

@@ -69,13 +69,11 @@ func ShowNoteEdit(t *views.Templates, noteService *models.NoteService, labelServ
 	})
 }
 
-func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(ctx context.Context) string) http.HandlerFunc {
-	parseSearchParam := func(r *http.Request) *models.NoteSearchParam {
-		var searchParam *models.NoteSearchParam
-		labelId, ok := getQueryInt(r, "label_id")
-		if ok {
-			searchParam = &models.NoteSearchParam{LabelId: labelId}
-		}
+func RenderNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(ctx context.Context) string) http.HandlerFunc {
+	parseSearchParam := func(r *http.Request) models.NoteSearchParam {
+		var searchParam models.NoteSearchParam
+		searchParam.LabelId, _ = getQueryInt(r, "label_id")
+		searchParam.Search = r.URL.Query().Get("search")
 		return searchParam
 	}
 	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
@@ -170,7 +168,7 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
 	return MinHandler(func(w http.ResponseWriter, r *http.Request, userId int) error {
 		ctx := r.Context()
-		notes, err := noteService.ListNotes(ctx, userId, nil)
+		notes, err := noteService.ListNotes(ctx, userId, models.NoteSearchParam{})
 		if err != nil {
 			return err
 		}
