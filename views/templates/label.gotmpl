@@ -43,26 +43,19 @@
 {{end}}
 
 {{ define "create_form" }}
-<form hx-post="/labels" id="create-form" hx-target="#contents" hx-swap="afterbegin" class="box rows">
-    <p>
-        <label>Name</label>
-        <input type="text" name="name">
-    </p>
+<form hx-post="/labels" id="create-form" hx-target="#contents" hx-swap="afterbegin" class="box"
+    style="display: grid; gap: 1rem; max-width: 600px;">
+    <label>Name</label>
+    <input type="text" name="name">
+    <label>Description</label>
+    <textarea name="description"></textarea>
 
-    <p>
-        <label>Description</label>
-        <textarea name="description"></textarea>
-    </p>
-
-    <p style="text-align: right;">
-
-        <span></span>
+    <strong style="text-align: right;">
         <button type="submit">Create</button>
-    </p>
-    <p style="text-align: right;">
-        <span></span>
+    </strong>
+    <span style="text-align: right;">
         <button type="button" onclick="$('#create-form').remove(); scrolltomain()">Close</button>
-    </p>
+    </span>
 </form>
 {{end}}
 
@@ -72,27 +65,21 @@
 {{end}}
 
 {{define "edit_form"}}
-<form hx-put="/labels/{{.Res.Id}}" id="edit-form" hx-target="#row-{{.Res.Id}}" hx-swap="outerHTML" class="box rows">
+<form hx-put="/labels/{{.Res.Id}}" id="edit-form" hx-target="#row-{{.Res.Id}}" hx-swap="outerHTML" class="box"
+    style="display: grid; gap: 1rem; max-width: 600px;">
 
-    <p>
-        <label>Name</label>
-        <input type="text" name="name" value="{{.Res.Name}}">
-    </p>
+    <label>Name</label>
+    <input type="text" name="name" value="{{.Res.Name}}">
 
-    <p>
-        <label>Description</label>
-        <textarea name="description">{{.Res.Description}}</textarea>
-    </p>
+    <label>Description</label>
+    <textarea name="description">{{.Res.Description}}</textarea>
 
-    <p style="text-align: right;">
-        <span></span>
+    <strong style="text-align: right;">
         <button type="submit">Update</button>
-    </p>
-
-    <p style="text-align: right;">
-        <span></span>
+    </strong>
+    <span style="text-align: right;">
         <button type="button" onclick="$('#edit-form').remove(); scrolltomain()">Close</button>
-    </p>
+    </span>
 
 </form>
 {{end}}

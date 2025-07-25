@@ -9,7 +9,7 @@ function myscroll(selector) {
 function scrolltomain() {
     myscroll("#main")
 }
-function autoResize(textarea) {
+function autoresize(textarea) {
     textarea.style.height = 'auto'; // Reset the height
     textarea.style.height = textarea.scrollHeight + 'px'; // Set height based on content
 }
@@ -19,6 +19,11 @@ function resizeAb(a, b) {
     a.style.height = 'auto'; // Reset the height
     a.style.height = b.scrollHeight + 'px'; // Set height based on content
 }
+// function resize(textarea) {
+//     textarea.style.height = 'auto';
+//     textarea.style.height = textarea.scrollHeight + 'px';
+// }
+
 document.body.addEventListener('htmx:responseError', function (event) {
     // Only handle 500 errors
     if (event.detail.xhr.status === 500) {

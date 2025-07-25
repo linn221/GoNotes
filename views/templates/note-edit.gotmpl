@@ -1,8 +1,7 @@
 {{define "main"}}
 <section x-data="{tags: ['apple', 'orange']}">
 	<h3>Edit Note</h3>
-	<form hx-put="/notes/{{.Res.Id}}" hx-swap="outerHTML" 
-		style="display: grid; gap: 1rem; max-width: 600px;">
+	<form hx-put="/notes/{{.Res.Id}}" hx-swap="outerHTML" style="display: grid; gap: 1rem; max-width: 600px;">
 
 		<label>Title</label>
 		<input type="text" name="title" required value="{{.Res.Title}}" autofocus>
@@ -18,7 +17,8 @@
 		</select>
 
 		<label>Remind:</label>
-		<input type="date" name="remind" {{if not .Res.RemindDate.IsZero}}value="{{.Res.RemindDate.InputValue}}"{{end}}>
+		<input type="date" name="remind" {{if not .Res.RemindDate.IsZero}}value="{{.Res.RemindDate.InputValue}}"
+			{{end}}>
 
 		<div class="flex-row">
 			<template x-for="(tag, index) in tags" :key="index">
@@ -34,7 +34,9 @@
 			<option value="Date">
 		</datalist>
 		<div style="display: flex;">
-			<button class="primary" style="margin-inline-start: auto;">Update</button>
+			<strong style="margin-inline-start: auto;">
+				<button>Update</button>
+			</strong>
 		</div>
 		<a href="/notes" role="button">Notes</a>
 	</form>

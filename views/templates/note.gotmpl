@@ -24,7 +24,7 @@
             </div>
             <footer>
                 <p role="toolbar">
-                    <a href="/notes/{{.Id}}/edit" role="button" class="secondary" hx-target="body">Edit</a>
+                    <a href="/notes/{{.Id}}/edit" class="secondary" hx-target="body">Edit</a>
                     <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete"
                         hx-confirm="Are you sure?">Delete</button>
                     <button hx-get="/notes/{{.Id}}/partial-edit?part=body">Edit Body</button>
@@ -53,7 +53,7 @@
     </div>
     <footer>
         <p role="toolbar">
-            <a href="/notes/{{.Res.Id}}/edit" role="button" class="secondary" hx-target="body">Edit</a>
+            <a href="/notes/{{.Res.Id}}/edit" hx-target="body">Edit</a>
             <button class="contrast" hx-delete="/notes/{{.Res.Id}}" hx-swap="delete"
                 hx-confirm="Are you sure?">Delete</button>
             <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=body">Edit Body</button>
@@ -68,10 +68,12 @@
 <div hx-target="this" hx-swap="outerHTML" class="box">
     <h3>Edit body</h3>
     <form hx-patch="/notes/{{.Res.Id}}" style="display: grid; gap: 1rem; max-width: 600px;">
-        <textarea name="body">{{.Res.Body}}</textarea>
-        <strong> <button type="submit">Update</button> </strong>
+        <textarea name="body" class="autoresize">{{.Res.Body}}</textarea>
+        <strong style="text-align: right;"> <button type="submit">Update</button> </strong>
+        <span style="text-align: right;">
+            <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none" style="text-align: right;" type="button">Cancel</button>
+        </span>
     </form>
-    <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none">Cancel</button>
 </div>
 {{end}}
 
@@ -87,7 +89,7 @@
                 {{end}}
             </select>
         </p>
-        <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none">Cancel</button>
+        <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none" style="text-align: right;">Cancel</button>
 
     </div>
 </div>

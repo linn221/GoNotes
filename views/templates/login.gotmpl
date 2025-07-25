@@ -39,13 +39,12 @@
     <div id="alert-container"></div>
     <div class="container">
         <h3>Login</h3>
-        <form hx-post="/login" hx-swap="outerHTML" class="box rows">
+        <form hx-post="/login" hx-swap="outerHTML" class="box" style="display: grid; gap: 1rem; max-width: 600px;">
             <input type="hidden" name="timezone" id="timezone-input">
             <p>
                 <label>Username</label>
                 <input type="text" name="username">
             </p>
-
             <p>
 
                 <label>Password</label>
