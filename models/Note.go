@@ -80,7 +80,10 @@ func (s *NoteService) Update(ctx context.Context, userId int, id int, input *Not
 		"Description": input.Description,
 		"Body":        input.Body,
 		"LabelId":     input.LabelId,
-		"RemindDate":  input.RemindDate,
+	}
+	if !input.RemindDate.IsZero() {
+		updates["RemindDate"] = input.RemindDate
+
 	}
 	if err := s.db.WithContext(ctx).Model(&note).Updates(updates).Error; err != nil {
 		return nil, err
@@ -187,6 +190,7 @@ func (s *NoteService) Get(ctx context.Context, userId int, id int) (*NoteResourc
 
 type NoteSearchParam struct {
 	LabelId int
+	Search  string
 }
 
 func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, error) {
@@ -197,20 +201,21 @@ func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, err
 	return notes, nil
 }
 
-func (s *NoteService) ListNotes(ctx context.Context, userId int, param *NoteSearchParam) ([]*NoteResource, error) {
+func (s *NoteService) ListNotes(ctx context.Context, userId int, param NoteSearchParam) ([]*NoteResource, error) {
 	var notes []Note
 	var err error
-	if param != nil {
-		dbCtx := s.db.WithContext(ctx).Preload("Label").Where("user_id = ?", userId)
-		if param.LabelId > 0 {
-			dbCtx.Where("label_id = ?", param.LabelId)
-		}
-
-		err = dbCtx.Order("updated_at DESC").Find(&notes).Error
-	} else {
-		notes, err = s.listAllNotes(ctx, userId)
+	dbCtx := s.db.WithContext(ctx).Preload("Label").Where("user_id = ?", userId)
+	if param.LabelId > 0 {
+		dbCtx.Where("label_id = ?", param.LabelId)
+	}
+	if param.Search != "" {
+		dbCtx.Where("title LIKE ? OR body LIKE ?",
+			"%"+param.Search+"%",
+			"%"+param.Search+"%",
+		)
 	}
 
+	err = dbCtx.Order("updated_at DESC").Find(&notes).Error
 	if err != nil {
 		return nil, err
 	}
@@ -298,7 +303,7 @@ func (s *NoteService) ImportNotes(ctx context.Context, userId int, rows [][]stri
 	for _, label := range labels {
 		labelMap[label.Name] = label.Id
 	}
-	existingNotes, err := s.ListNotes(ctx, userId, nil)
+	existingNotes, err := s.ListNotes(ctx, userId, NoteSearchParam{})
 	if err != nil {
 		return err
 	}

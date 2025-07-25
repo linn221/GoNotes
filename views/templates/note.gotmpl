@@ -2,96 +2,36 @@
 <section id="main">
     <form hx-boost="false" id="export-form" action="/notes/export" method="POST" target="_blank">
     </form>
-    <nav>
-        <ul>
-            <li>
-                <a role="button" href="/notes/new" hx-boost="true">New</a>
-            </li>
-        </ul>
-        <ul>
 
-            <li>
-                <button type="submit" form="export-form">Export</button>
-            </li>
-        </ul>
+    <div style="text-align: right;">
+        <a role="button" href="/notes/new" hx-boost="true" class="big">New</a>
+    </div>
+    <button type="submit" form="export-form">Export</button>
     </nav>
     <div id="contents">
         {{ range .ResList }}
-        <article id="note-{{.Id}}" x-data="{ showDetail: false, showInlineForm: false}">
-            <header>
-                `{{.Title}}` at {{.CreatedAt.LocalString $.Timezone}}
-            </header>
-
-            {{if not .RemindDate.IsZero}}
-            <div class="grid">
-                <input type="date" name="remind" value="{{.RemindDate.InputValue}}" hx-patch="/notes/{{.Id}}"
-                    hx-trigger="change" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
-                <div></div>
-                <div></div>
-            </div>
-            {{end}}
-
-            <div class="grid">
-                <select name="label_id" class="contrast" hx-patch="/notes/{{.Id}}" hx-trigger="change" hx-target="#note-{{.Id}}"
-                    hx-swap="outerHTML">
-                    {{range $.Labels}}
-                    <option value="{{.Id}}" {{if eq $.LabelId .Id}}selected{{end}}>
-                        {{.Name}}
-                    </option>
-                    {{end}}
-                </select>
-                <div></div>
-                <div></div>
-            </div>
-
-            <i>{{.Description}}</i>
-
-            {{if .HasBody}}
-            <hr>
-            <div class="note-body">
-
-                <div x-show="showDetail">
+        <details hx-target="this" hx-swap="outerHTML">
+            <summary>{{.Title}}</summary>
+            <div>
+                <label>Label: {{.LabelName}}</label>
+                {{if .Body}}
+                <hr>
+                <div>
                     {{.Body}}
-                    <button @click="showDetail = false;" class="link-like-button">less</button>
                 </div>
+                {{end}}
 
-                <div x-show="!showDetail">
-                    <div>
-                        {{.BodyShort}}
-                        {{if .ReadMoreRequired}}
-                        <button @click="showDetail = true;" class="link-like-button">...more</button>
-                        {{end}}
-                    </div>
-                </div>
-
-                <div x-show="showInlineForm">
-                    <form hx-patch="/notes/{{.Id}}" hx-target="#note-{{.Id}}" hx-swap="outerHTML">
-                        <label><strong>Edit Body</strong></label>
-                        <textarea name="body" id="note-body-{{.Id}}" oninput="autoResize(this)"
-                            onfocus="autoResize(this)">{{.Body}}</textarea>
-                        <div>
-                            <button type="submit" class="secondary">Submit</button>
-                        </div>
-                    </form>
-                    <button @click="showInlineForm = false;" style="display: block; width: 100%;">close</button>
-                </div>
             </div>
-            <hr>
-            {{else}}
-                <br>
-            {{end}}
-
-            <!-- <small>Created At: <span class="semi-bold">{{.CreatedAt}}</span></small> -->
-            <small>Updated At: <span class="semi-bold">{{.UpdatedAt.LocalString $.Timezone}}</span></small>
-
             <footer>
-                <a href="/notes/{{.Id}}/edit" hx-boost="true" role="button" class="secondary">Edit</a>
-                <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete" hx-target="#note-{{.Id}}"
-                    hx-confirm="Are you sure?">Delete</button>
-                <button x-show="!showInlineForm" @click="showInlineForm = true;" class="secondary outline">Edit Body</button>
+                <p role="toolbar">
+                    <a href="/notes/{{.Id}}/edit" role="button" class="secondary" hx-target="body">Edit</a>
+                    <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete"
+                        hx-confirm="Are you sure?">Delete</button>
+                    <button hx-get="/notes/{{.Id}}/partial-edit?part=body">Edit Body</button>
+                    <button hx-get="/notes/{{.Id}}/partial-edit?part=label">Edit Label</button>
+                </p>
             </footer>
-        </article>
-
+        </details>
         {{ end }}
     </div>
 
@@ -99,80 +39,56 @@
 {{ end }}
 
 {{define "note"}}
-
-<article id="note-{{.Id}}" x-data="{ showDetail: false, showInlineForm: false}">
-    <header>
-        `{{.Res.Title}}` at {{.Res.CreatedAt.LocalString .Timezone}}
-    </header>
-
-    {{if not .Res.RemindDate.IsZero}}
-    <div class="grid">
-        <input type="date" name="remind" value="{{.Res.RemindDate.InputValue}}" hx-patch="/notes/{{.Res.Id}}"
-            hx-trigger="change" hx-target="#note-{{.Res.Id}}" hx-swap="outerHTML">
-        <div></div>
-        <div></div>
-    </div>
-    {{end}}
-
-    <div class="grid">
-        <select name="label_id" class="contrast" hx-patch="/notes/{{.Res.Id}}" hx-trigger="change" hx-target="#note-{{.Res.Id}}"
-            hx-swap="outerHTML">
-            {{range .Labels}}
-            <option value="{{$.Res.Id}}" {{if eq $.Res.LabelId .Id}}selected{{end}}>
-                {{.Name}}
-            </option>
-            {{end}}
-        </select>
-        <div></div>
-        <div></div>
-    </div>
-
-    <i>{{.Res.Description}}</i>
-
-    {{if .Res.HasBody}}
-    <hr>
-    <div class="note-body">
-
-        <div x-show="showDetail">
+<details hx-target="this" hx-swap="outerHTML" {{if .Data.ExpandNote}}open{{end}}>
+    <summary>{{.Res.Title}}</summary>
+    <div>
+        <label>Label: {{.Res.LabelName}}</label>
+        {{if .Res.Body}}
+        <hr>
+        <div>
             {{.Res.Body}}
-            <button @click="showDetail = false;" class="link-like-button">less</button>
         </div>
+        {{end}}
 
-        <div x-show="!showDetail">
-            <div>
-                {{.Res.BodyShort}}
-                {{if .Res.ReadMoreRequired}}
-                <button @click="showDetail = true;" class="link-like-button">...more</button>
-                {{end}}
-            </div>
-        </div>
-
-        <div x-show="showInlineForm">
-            <form hx-patch="/notes/{{.Res.Id}}" hx-target="#note-{{.Res.Id}}" hx-swap="outerHTML">
-                <label><strong>Edit Body</strong></label>
-                <textarea name="body" id="note-body-{{.Res.Id}}" oninput="autoResize(this)"
-                    onfocus="autoResize(this)">{{.Res.Body}}</textarea>
-                <div>
-                    <button type="submit" class="secondary">Submit</button>
-                </div>
-            </form>
-            <button @click="showInlineForm = false;" style="display: block; width: 100%;">close</button>
-        </div>
     </div>
-    <hr>
-    {{else}}
-        <br>
-    {{end}}
-
-    <!-- <small>Created At: <span class="semi-bold">{{.Res.CreatedAt}}</span></small> -->
-    <small>Updated At: <span class="semi-bold">{{.Res.UpdatedAt.LocalString .Timezone}}</span></small>
-
     <footer>
-        <a href="/notes/{{.Res.Id}}/edit" hx-boost="true" role="button" class="secondary">Edit</a>
-        <button class="contrast" hx-delete="/notes/{{.Res.Id}}" hx-swap="delete" hx-target="#note-{{.Res.Id}}"
-            hx-confirm="Are you sure?">Delete</button>
-        <button x-show="!showInlineForm" @click="showInlineForm = true;" class="secondary outline">Edit Body</button>
+        <p role="toolbar">
+            <a href="/notes/{{.Res.Id}}/edit" role="button" class="secondary" hx-target="body">Edit</a>
+            <button class="contrast" hx-delete="/notes/{{.Res.Id}}" hx-swap="delete"
+                hx-confirm="Are you sure?">Delete</button>
+            <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=body">Edit Body</button>
+            <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=label">Edit Label</button>
+        </p>
     </footer>
-</article>
+</details>
 
+{{end}}
+
+{{define "edit-body"}}
+<div hx-target="this" hx-swap="outerHTML" class="box">
+    <h3>Edit body</h3>
+    <form hx-patch="/notes/{{.Res.Id}}" style="display: grid; gap: 1rem; max-width: 600px;">
+        <textarea name="body">{{.Res.Body}}</textarea>
+        <strong> <button type="submit">Update</button> </strong>
+    </form>
+    <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none">Cancel</button>
+</div>
+{{end}}
+
+{{define "edit-label"}}
+<div hx-target="this" hx-swap="outerHTML">
+    <h3>Select Label</h3>
+    <div class="box">
+        <p>
+
+            <select name="label_id" hx-patch="/notes/{{.Res.Id}}" hx-trigger="change">
+                {{range .Data.LabelList}}
+                <option value="{{.Id}}" {{if eq $.Res.LabelId .Id}}selected{{end}}>{{.Name}}</option>
+                {{end}}
+            </select>
+        </p>
+        <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none">Cancel</button>
+
+    </div>
+</div>
 {{end}}

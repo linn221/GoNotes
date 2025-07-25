@@ -1,22 +1,23 @@
 {{ define "nav" }}
-<nav>
-  <ul>
-    <li><a href="/notes" hx-boost="true">Notes</a></li>
-    <li><a href="/labels" hx-boost="true">Labels</a></li>
-    <li><a href="/notes/import">Import Notes</a></li>
-  </ul>
-  <ul>
-    <li>
-      <details class="dropdown">
-        <summary>
-          Account
-        </summary>
-        <ul dir="rtl">
-          <li><a href="/change-password">Change Password</a></li>
-          <li hx-post="/logout" style="cursor: pointer;">Logout</li>
-        </ul>
-      </details>
-    </li>
-  </ul>
-</nav>
+    <header class="navbar">
+        <nav class="contents">
+            <ul role="list">
+                <li><a href="/notes"
+                    {{if eq .Nav "notes"}}aria-current="page"{{end}}
+                    >Notes</a></li>
+
+                <li><a href="/labels"
+                    {{if eq .Nav "labels"}}aria-current="page"{{end}}
+                    >Labels</a></li>
+
+                <li><a href="/notes/import">Import Notes</a></li>
+
+                <li>
+                    <a href="/account"
+                    {{if eq .Nav "account"}}aria-current="page"{{end}}
+                    >Account</a>
+                </li>
+            </ul>
+        </nav>
+    </header>
 {{end}}

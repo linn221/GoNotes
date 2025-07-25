@@ -10,6 +10,7 @@ type Templates struct {
 	loginTemplate    *template.Template
 	registerTemplate *template.Template
 	indexTemplate    *template.Template
+	errorBoxTemplate *template.Template
 
 	labelTemplate          *template.Template
 	noteTemplate           *template.Template
@@ -17,6 +18,7 @@ type Templates struct {
 	noteEditTemplate       *template.Template
 	importNoteTemplate     *template.Template
 	changePasswordTemplate *template.Template
+	accountTemplate        *template.Template
 
 	// internalErrorTemplate  *template.Template //2d
 	// notFoundTemplate       *template.Template //2d
@@ -45,12 +47,14 @@ func NewTemplates(templateDir string) *Templates {
 		registerTemplate: template.Must(
 			template.New("root").ParseFiles(filepath.Join(templateDir, "register.gotmpl"))),
 		changePasswordTemplate: parsePage("change-password.gotmpl"),
+		errorBoxTemplate:       template.Must(template.ParseFiles(filepath.Join(templateDir, "errorbox.gotmpl"))),
 		indexTemplate:          parsePage("index.gotmpl"),
 		labelTemplate:          parsePage("label.gotmpl"),
 		noteTemplate:           parsePage("note.gotmpl"),
 		noteCreateTemplate:     parsePage("note-create.gotmpl"),
 		noteEditTemplate:       parsePage("note-edit.gotmpl"),
 		importNoteTemplate:     parsePage("import-notes.gotmpl"),
+		accountTemplate:        parsePage("account-actions.gotmpl"),
 	}
 }
 

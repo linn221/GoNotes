@@ -28,18 +28,25 @@ func parseNote(r *http.Request) (*models.Note, services.FormErrors) {
 
 	return &input, fe
 }
-
+func ShowNoteImport(t *views.Templates) http.HandlerFunc {
+	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
+		return vr.ShowNoteImport()
+	})
+}
 func ShowNoteCreate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
 		labels, err := labelService.ListActiveOnly(ctx, session.UserId)
 		if err != nil {
 			return err
 		}
+		if len(labels) <= 0 {
+			return errors.New("please create a label to continue")
+		}
 		labelId, ok := getQueryInt(r, "label_id")
 		if !ok {
 			labelId = labels[0].Id
 		}
-		return vr.NoteCreateForm(session.UserId, labels, labelId)
+		return vr.ShowNoteCreate(session.UserId, labels, labelId)
 	})
 }
 
@@ -65,17 +72,42 @@ func ShowNoteEdit(t *views.Templates, noteService *models.NoteService, labelServ
 			return err
 		}
 
-		return vr.NoteEditForm(session.UserId, session.ResId, res, labels)
+		return vr.ShowNoteEdit(session.UserId, session.ResId, res, labels)
 	})
 }
 
-func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(ctx context.Context) string) http.HandlerFunc {
-	parseSearchParam := func(r *http.Request) *models.NoteSearchParam {
-		var searchParam *models.NoteSearchParam
-		labelId, ok := getQueryInt(r, "label_id")
-		if ok {
-			searchParam = &models.NoteSearchParam{LabelId: labelId}
+func ShowNotePartialEdit(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(context.Context) string) http.HandlerFunc {
+	return ResourceHandler(t, func(ctx context.Context, r *http.Request, session *Session, vr *views.Renderer) error {
+		res, err := noteService.Get(ctx, session.UserId, session.ResId)
+		if err != nil {
+			return err
 		}
+		part := r.URL.Query().Get("part")
+		if part == "" {
+			return errors.New("part must be specified")
+		}
+		switch part {
+		case "body":
+			return vr.ShowNotePartialEditBody(res)
+		case "label":
+			labels, err := labelService.ListActiveOnly(ctx, session.UserId)
+			if err != nil {
+				return err
+			}
+			return vr.ShowNotePartialEditLabel(res, labels)
+		case "none":
+			return vr.HandleNotePartialUpdate(res, tz(ctx))
+		default:
+			return errors.New("invalid query")
+		}
+	})
+}
+
+func RenderNoteIndex(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService, tz func(ctx context.Context) string) http.HandlerFunc {
+	parseSearchParam := func(r *http.Request) models.NoteSearchParam {
+		var searchParam models.NoteSearchParam
+		searchParam.LabelId, _ = getQueryInt(r, "label_id")
+		searchParam.Search = r.URL.Query().Get("search")
 		return searchParam
 	}
 	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
@@ -90,20 +122,13 @@ func ShowNoteIndex(t *views.Templates, noteService *models.NoteService, labelSer
 		if err != nil {
 			return err
 		}
-		return vr.NoteIndexPage(notes, labels, timezone)
+		return vr.RenderNoteIndex(notes, labels, timezone)
 	})
 }
 
 func HandleNoteCreate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
 
-	return CreateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Note, fe services.FormErrors, vr *views.Renderer) error {
-		if len(fe) > 0 {
-			labels, err := labelService.ListActiveOnly(r.Context(), session.UserId)
-			if err != nil {
-				return err
-			}
-			return vr.NoteCreateError(input, labels, fe)
-		}
+	return CreateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Note, vr *views.Renderer) error {
 		if input.Description == "" {
 			input.Description = input.Title
 		}
@@ -118,15 +143,7 @@ func HandleNoteCreate(t *views.Templates, noteService *models.NoteService, label
 }
 
 func HandleNoteUpdate(t *views.Templates, noteService *models.NoteService, labelService *models.LabelService) http.HandlerFunc {
-	return UpdateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Note, fe services.FormErrors, renderer *views.Renderer) error {
-		if len(fe) > 0 {
-			labels, err := labelService.ListActiveOnly(r.Context(), session.UserId)
-			if err != nil {
-				return err
-			}
-
-			return renderer.NoteEditError(session.UserId, session.ResId, input, fe, labels)
-		}
+	return UpdateHandler(t, parseNote, func(w http.ResponseWriter, r *http.Request, session *Session, input *models.Note, renderer *views.Renderer) error {
 		_, err := noteService.Update(r.Context(), session.UserId, session.ResId, input)
 		if err != nil {
 			return err
@@ -136,8 +153,8 @@ func HandleNoteUpdate(t *views.Templates, noteService *models.NoteService, label
 	})
 }
 
-func HandleNoteDelete(noteService *models.NoteService) http.HandlerFunc {
-	return DeleteHandler(func(ctx context.Context, r *http.Request, userId, resId int) error {
+func HandleNoteDelete(t *views.Templates, noteService *models.NoteService) http.HandlerFunc {
+	return DeleteHandler(t, func(ctx context.Context, r *http.Request, userId, resId int) error {
 		_, err := noteService.Delete(ctx, userId, resId)
 		if err != nil {
 			return err
@@ -172,20 +189,16 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 		if err != nil {
 			return err
 		}
-		labels, err := labelService.ListActiveOnly(ctx, session.UserId)
-		if err != nil {
-			return err
-		}
 
 		timezone := tz(ctx)
-		return vr.NoteUpdateBodySuccess(updated, labels, timezone)
+		return vr.HandleNotePartialUpdate(updated, timezone)
 	})
 }
 
 func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
 	return MinHandler(func(w http.ResponseWriter, r *http.Request, userId int) error {
 		ctx := r.Context()
-		notes, err := noteService.ListNotes(ctx, userId, nil)
+		notes, err := noteService.ListNotes(ctx, userId, models.NoteSearchParam{})
 		if err != nil {
 			return err
 		}
@@ -196,12 +209,6 @@ func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
 
 		// htmxRedirect(w, "/")
 		return nil
-	})
-}
-
-func ShowNoteImport(t *views.Templates) http.HandlerFunc {
-	return DefaultHandler(t, func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
-		return vr.NoteImportPage()
 	})
 }
 

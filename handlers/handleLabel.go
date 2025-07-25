@@ -26,7 +26,7 @@ func parseLabel(r *http.Request) (*models.Label, services.FormErrors) {
 
 func ShowLabelCreate(t *views.Templates) http.HandlerFunc {
 	return DefaultHandler(t, func(ctx context.Context, r1 *http.Request, ds *DefaultSession, r2 *views.Renderer) error {
-		return r2.LabelCreateForm()
+		return r2.ShowLabelCreate()
 	})
 }
 
@@ -36,43 +36,40 @@ func ShowLabelEdit(t *views.Templates, labelService *models.LabelService) http.H
 		if err != nil {
 			return err
 		}
-		return vr.LabelEditForm(session.ResId, label)
+		return vr.ShowLabelEdit(session.ResId, label)
 	}
 	return ResourceHandler(t, h)
 }
 
-func ShowLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
+func RenderLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
 		results, err := labelService.ListAll(r.Context(), session.UserId)
 		if err != nil {
 			return err
 		}
-		return vr.LabelIndexPage(results)
+		return vr.RenderLabelIndex(results)
 	}
 	return DefaultHandler(t, h)
 }
 
 func HandleLabelUpdate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
-	handle := func(w http.ResponseWriter, r *http.Request, s *Session, input *models.Label, fe services.FormErrors, vr *views.Renderer) error {
-		if len(fe) > 0 {
-			return vr.LabelUpdateError(s.ResId, input, fe)
-		}
+	handle := func(w http.ResponseWriter, r *http.Request, s *Session, input *models.Label, vr *views.Renderer) error {
 		label, err := labelService.Update(r.Context(), s.UserId, s.ResId, input)
 		if err != nil {
 			return err
 		}
-		return vr.LabelUpdateOk(label)
+		return vr.HandleLabelUpdate(label)
 	}
 	return UpdateHandler(t, parseLabel, handle)
 }
 
-func HandleLabelDelete(labelService *models.LabelService) http.HandlerFunc {
+func HandleLabelDelete(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, userId, resId int) error {
 		_, err := labelService.Delete(ctx, userId, resId)
 		return err
 	}
 
-	return DeleteHandler(h)
+	return DeleteHandler(t, h)
 }
 
 func HandleLabelToggleActive(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
@@ -87,23 +84,18 @@ func HandleLabelToggleActive(t *views.Templates, labelService *models.LabelServi
 		if err != nil {
 			return err
 		}
-		return vr.LabelToggleButton(label)
+		return vr.HandleLabelToggleActive(label)
 	})
 }
 
 func HandleLabelCreate(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 
-	handle := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, fe services.FormErrors, vr *views.Renderer) error {
-		if len(fe) > 0 {
-			w.Header().Add("HX-Retarget", "#create-form")
-			w.Header().Add("HX-Reswap", "outerHTML")
-			return vr.LabelCreateError(input, fe)
-		}
+	handle := func(w http.ResponseWriter, r *http.Request, session *DefaultSession, input *models.Label, vr *views.Renderer) error {
 		label, err := labelService.Create(r.Context(), session.UserId, input)
 		if err != nil {
 			return err
 		}
-		return vr.LabelCreateOk(label)
+		return vr.HandleLabelCreate(label)
 	}
 	return CreateHandler(t, parseLabel, handle)
 }

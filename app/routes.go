@@ -27,13 +27,13 @@ func (app *App) Serve() {
 	authMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/labels", http.StatusPermanentRedirect)
 	})
-	authMux.HandleFunc("GET /labels", handlers.ShowLabelIndex(t, myServices.LabelService))
+	authMux.HandleFunc("GET /labels", handlers.RenderLabelIndex(t, myServices.LabelService))
 	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(t))
 	authMux.HandleFunc("GET /labels/{id}/edit", handlers.ShowLabelEdit(t, myServices.LabelService))
 	authMux.HandleFunc("POST /labels/{id}/toggle", handlers.HandleLabelToggleActive(t, myServices.LabelService))
 	authMux.HandleFunc("POST /labels", handlers.HandleLabelCreate(t, myServices.LabelService))
 	authMux.HandleFunc("PUT /labels/{id}", handlers.HandleLabelUpdate(t, myServices.LabelService))
-	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(myServices.LabelService))
+	authMux.HandleFunc("DELETE /labels/{id}", handlers.HandleLabelDelete(t, myServices.LabelService))
 
 	//notes
 	getTimezone := func(ctx context.Context) string {
@@ -50,14 +50,18 @@ func (app *App) Serve() {
 
 	authMux.HandleFunc("GET /notes/new", handlers.ShowNoteCreate(t, myServices.LabelService))
 	authMux.HandleFunc("GET /notes/{id}/edit", handlers.ShowNoteEdit(t, myServices.NoteService, myServices.LabelService))
-	authMux.HandleFunc("GET /notes", handlers.ShowNoteIndex(t, myServices.NoteService, myServices.LabelService, getTimezone))
+	authMux.HandleFunc("GET /notes/{id}/partial-edit", handlers.ShowNotePartialEdit(t, myServices.NoteService, myServices.LabelService, getTimezone))
+	authMux.HandleFunc("GET /notes/import", handlers.ShowNoteImport(t))
+	authMux.HandleFunc("GET /notes", handlers.RenderNoteIndex(t, myServices.NoteService, myServices.LabelService, getTimezone))
 	authMux.HandleFunc("POST /notes", handlers.HandleNoteCreate(t, myServices.NoteService, myServices.LabelService))
 	authMux.HandleFunc("POST /notes/export", handlers.HandleNoteExport(myServices.NoteService))
-	authMux.HandleFunc("GET /notes/import", handlers.ShowNoteImport(t))
 	authMux.HandleFunc("POST /notes/import", handlers.HandleNoteImport(myServices.NoteService))
 	authMux.HandleFunc("PATCH /notes/{id}", handlers.HandleNotePartialUpdate(t, myServices.NoteService, myServices.LabelService, getTimezone))
 	authMux.HandleFunc("PUT /notes/{id}", handlers.HandleNoteUpdate(t, myServices.NoteService, myServices.LabelService))
-	authMux.HandleFunc("DELETE /notes/{id}", handlers.HandleNoteDelete(myServices.NoteService))
+	authMux.HandleFunc("DELETE /notes/{id}", handlers.HandleNoteDelete(t, myServices.NoteService))
+	authMux.HandleFunc("GET /account", func(w http.ResponseWriter, r *http.Request) {
+		t.AccountPage(w)
+	})
 
 	mainMux := http.NewServeMux()
 	// public routes
