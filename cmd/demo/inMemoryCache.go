@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"sync"
 	"time"
 )
@@ -12,13 +13,14 @@ type inMemoryCache struct {
 	mu   sync.Mutex
 	data map[string]any
 	sets map[string]map[string]struct{}
-	hash map[string]map[string]string
+	hash map[string]map[string]any
 }
 
 func NewInMemoryCache() *inMemoryCache {
 	return &inMemoryCache{
 		data: make(map[string]any),
 		sets: make(map[string]map[string]struct{}),
+		hash: make(map[string]map[string]any),
 	}
 }
 
@@ -148,15 +150,11 @@ func (c *inMemoryCache) SetH(key string, values map[string]any, _ time.Duration)
 	defer c.mu.Unlock()
 
 	if _, exists := c.hash[key]; !exists {
-		c.hash[key] = make(map[string]string)
+		c.hash[key] = make(map[string]any)
 	}
 
 	for field, value := range values {
-		strVal, ok := value.(string)
-		if !ok {
-			return errors.New("SetH only supports string values")
-		}
-		c.hash[key][field] = strVal
+		c.hash[key][field] = value
 	}
 
 	return nil
@@ -177,5 +175,5 @@ func (c *inMemoryCache) GetH(key string, field string) (string, error) {
 		return "", errors.New("field not found")
 	}
 
-	return val, nil
+	return fmt.Sprint(val), nil
 }

@@ -46,7 +46,7 @@ func (m *SessionMiddleware) Middleware(next http.Handler) http.Handler {
 		//2d check token length
 		val, err := m.Cache.GetH("Token:"+token, "userId")
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
+			respondInvalidSession(w, r)
 			return
 		}
 		userId, err := strconv.Atoi(val)
