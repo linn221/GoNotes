@@ -26,7 +26,7 @@ func parseLabel(r *http.Request) (*models.Label, services.FormErrors) {
 
 func ShowLabelCreate(t *views.Templates) http.HandlerFunc {
 	return DefaultHandler(t, func(ctx context.Context, r1 *http.Request, ds *DefaultSession, r2 *views.Renderer) error {
-		return r2.LabelCreateForm()
+		return r2.ShowLabelCreate()
 	})
 }
 
@@ -36,18 +36,18 @@ func ShowLabelEdit(t *views.Templates, labelService *models.LabelService) http.H
 		if err != nil {
 			return err
 		}
-		return vr.LabelEditForm(session.ResId, label)
+		return vr.ShowLabelEdit(session.ResId, label)
 	}
 	return ResourceHandler(t, h)
 }
 
-func PageLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
+func RenderLabelIndex(t *views.Templates, labelService *models.LabelService) http.HandlerFunc {
 	h := func(ctx context.Context, r *http.Request, session *DefaultSession, vr *views.Renderer) error {
 		results, err := labelService.ListAll(r.Context(), session.UserId)
 		if err != nil {
 			return err
 		}
-		return vr.LabelIndexPage(results)
+		return vr.RenderLabelIndex(results)
 	}
 	return DefaultHandler(t, h)
 }
@@ -58,7 +58,7 @@ func HandleLabelUpdate(t *views.Templates, labelService *models.LabelService) ht
 		if err != nil {
 			return err
 		}
-		return vr.LabelUpdateOk(label)
+		return vr.HandleLabelUpdate(label)
 	}
 	return UpdateHandler(t, parseLabel, handle)
 }
@@ -84,7 +84,7 @@ func HandleLabelToggleActive(t *views.Templates, labelService *models.LabelServi
 		if err != nil {
 			return err
 		}
-		return vr.LabelToggleButton(label)
+		return vr.HandleLabelToggleActive(label)
 	})
 }
 
@@ -95,7 +95,7 @@ func HandleLabelCreate(t *views.Templates, labelService *models.LabelService) ht
 		if err != nil {
 			return err
 		}
-		return vr.LabelCreateOk(label)
+		return vr.HandleLabelCreate(label)
 	}
 	return CreateHandler(t, parseLabel, handle)
 }

@@ -18,7 +18,7 @@
 {{ end }}
 
 {{define "note"}}
-<details id="note-{{.Id}}" class="big">
+<details hx-target="this" hx-swap="outerHTML" {{with .ExpandNote}}open{{end}}>
     <summary>{{.Title}}</summary>
     <div>
         <label>Label: {{.LabelName}}</label>
@@ -32,11 +32,42 @@
     </div>
     <footer>
         <p role="toolbar">
-            <a href="/notes/{{.Id}}/edit" role="button" class="secondary">Edit</a>
-            <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete" hx-target="#note-{{.Id}}"
+            <a href="/notes/{{.Id}}/edit" role="button" class="secondary" hx-target="body">Edit</a>
+            <button class="contrast" hx-delete="/notes/{{.Id}}" hx-swap="delete"
                 hx-confirm="Are you sure?">Delete</button>
+            <button hx-get="/notes/{{.Id}}/partial-edit?part=body">Edit Body</button>
+            <button hx-get="/notes/{{.Id}}/partial-edit?part=label">Edit Label</button>
         </p>
     </footer>
 </details>
 
+{{end}}
+
+{{define "edit-body"}}
+<div hx-target="this" hx-swap="outerHTML" class="box">
+    <h3>Edit body</h3>
+    <form hx-patch="/notes/{{.Id}}" style="display: grid; gap: 1rem; max-width: 600px;">
+        <textarea name="body">{{.Body}}</textarea>
+        <strong> <button type="submit">Update</button> </strong>
+    </form>
+    <button hx-get="/notes/{{.Id}}/partial-edit?part=none">Cancel</button>
+</div>
+{{end}}
+
+{{define "edit-label"}}
+<div hx-target="this" hx-swap="outerHTML">
+    <h3>Select Label</h3>
+    <div class="box">
+        <p>
+
+            <select name="label_id" hx-patch="/notes/{{.Res.Id}}" hx-trigger="change">
+                {{range .Labels}}
+                <option value="{{.Id}}" {{if eq $.Res.LabelId .Id}}selected{{end}}>{{.Name}}</option>
+                {{end}}
+            </select>
+        </p>
+        <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none">Cancel</button>
+
+    </div>
+</div>
 {{end}}
