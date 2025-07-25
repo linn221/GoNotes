@@ -39,6 +39,9 @@ func ShowNoteCreate(t *views.Templates, labelService *models.LabelService) http.
 		if err != nil {
 			return err
 		}
+		if len(labels) <= 0 {
+			return errors.New("please create a label to continue")
+		}
 		labelId, ok := getQueryInt(r, "label_id")
 		if !ok {
 			labelId = labels[0].Id

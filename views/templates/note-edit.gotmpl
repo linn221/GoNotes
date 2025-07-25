@@ -1,7 +1,7 @@
 {{define "main"}}
 <section x-data="{tags: ['apple', 'orange']}">
 	<h3>Edit Note</h3>
-	<form hx-put="/notes/{{.Id}}" hx-swap="outerHTML" 
+	<form hx-put="/notes/{{.Res.Id}}" hx-swap="outerHTML" 
 		style="display: grid; gap: 1rem; max-width: 600px;">
 
 		<label>Title</label>
@@ -12,7 +12,7 @@
 
 		<label>Label</label>
 		<select name="label_id">
-			{{range .Labels}}
+			{{range .Data.LabelList}}
 			<option value="{{.Id}}" {{if eq $.Res.LabelId .Id}}selected{{end}}>{{.Name}}</option>
 			{{end}}
 		</select>

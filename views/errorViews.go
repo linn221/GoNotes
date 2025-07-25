@@ -8,7 +8,7 @@ import (
 func ShowFormError(t *Templates, w http.ResponseWriter, fe services.FormErrors) error {
 	w.Header().Add("HX-Reswap", "outerHTML")
 	w.Header().Add("HX-Retarget", "#flash") // oob swap does not work with after-swap event so retargeting it
-	return t.errorBoxTemplate.ExecuteTemplate(w, "form_error", map[string]any{
+	return t.errorBoxTemplate.ExecuteTemplate(w, "form_error", H{
 		"ErrorMap": fe,
 	})
 }
@@ -16,7 +16,7 @@ func ShowFormError(t *Templates, w http.ResponseWriter, fe services.FormErrors) 
 func ShowDefaultError(t *Templates, w http.ResponseWriter, err error) error {
 	w.Header().Add("HX-Reswap", "outerHTML")
 	w.Header().Add("HX-Retarget", "#flash") // oob swap does not work with after-swap event so retargeting it
-	return t.errorBoxTemplate.ExecuteTemplate(w, "error", map[string]any{
+	return t.errorBoxTemplate.ExecuteTemplate(w, "error", H{
 		"Title":   "Error",
 		"Message": err.Error(),
 	})
@@ -25,7 +25,7 @@ func ShowDefaultError(t *Templates, w http.ResponseWriter, err error) error {
 func ShowInternalError(t *Templates, w http.ResponseWriter, err error) error {
 	w.Header().Add("HX-Reswap", "outerHTML")
 	w.Header().Add("HX-Retarget", "#flash")
-	return t.errorBoxTemplate.ExecuteTemplate(w, "error", map[string]any{
+	return t.errorBoxTemplate.ExecuteTemplate(w, "error", H{
 		"Title":   "Internal Error",
 		"Message": err.Error(),
 	})

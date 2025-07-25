@@ -72,7 +72,7 @@
 {{end}}
 
 {{define "edit_form"}}
-<form hx-put="/labels/{{.Id}}" id="edit-form" hx-target="#row-{{.Id}}" hx-swap="outerHTML" class="box rows">
+<form hx-put="/labels/{{.Res.Id}}" id="edit-form" hx-target="#row-{{.Res.Id}}" hx-swap="outerHTML" class="box rows">
 
     <p>
         <label>Name</label>

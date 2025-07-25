@@ -12,8 +12,8 @@
 
 		<label>Label</label>
 		<select name="label_id">
-			{{range .Labels}}
-			<option value="{{.Id}}" {{if eq $.LabelId .Id}}selected{{end}}>{{.Name}}</option>
+			{{range .Data.Labels}}
+			<option value="{{.Id}}" {{if eq $.Data.LabelId .Id}}selected{{end}}>{{.Name}}</option>
 			{{end}}
 		</select>
 
