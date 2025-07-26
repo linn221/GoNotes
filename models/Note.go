@@ -43,6 +43,7 @@ type NoteResource struct {
 	LabelName    string
 	ParentNoteId int
 	RemindDate   MyDate
+	Pinned       bool
 	CreatedAt    MyDateTime
 	UpdatedAt    MyDateTime
 }
@@ -193,18 +194,13 @@ type NoteSearchParam struct {
 	Search  string
 }
 
-func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, error) {
-	notes, err := find[Note](s.db.WithContext(ctx).Order("updated_at DESC"), userId, "Label")
-	if err != nil {
-		return nil, err
-	}
-	return notes, nil
+func (n *NoteSearchParam) IsActive() bool {
+	return !(n.LabelId == 0 && n.Search == "")
 }
 
-func (s *NoteService) ListNotes(ctx context.Context, userId int, param NoteSearchParam) ([]*NoteResource, error) {
+func (n *NoteService) SearchNotes(ctx context.Context, userId int, param *NoteSearchParam) ([]Note, error) {
 	var notes []Note
-	var err error
-	dbCtx := s.db.WithContext(ctx).Preload("Label").Where("user_id = ?", userId)
+	dbCtx := n.db.WithContext(ctx).Preload("Label").Where("user_id = ?", userId)
 	if param.LabelId > 0 {
 		dbCtx.Where("label_id = ?", param.LabelId)
 	}
@@ -215,13 +211,77 @@ func (s *NoteService) ListNotes(ctx context.Context, userId int, param NoteSearc
 		)
 	}
 
-	err = dbCtx.Order("updated_at DESC").Find(&notes).Error
+	err := dbCtx.Order("updated_at DESC").Find(&notes).Error
+	return notes, err
+}
+
+func (s *NoteService) listAllNotes(ctx context.Context, userId int) ([]Note, error) {
+	var notes []Note
+	err := s.db.WithContext(ctx).Preload("Label").Where("user_id = ?", userId).
+		Order("updated_at DESC").Find(&notes).Error
+	return notes, err
+}
+
+// list notes but pin today remind note if exist
+func (s *NoteService) listRemindNotes(ctx context.Context, userId int, timezone string) ([]Note, int, error) {
+
+	localDate, err := utils.GetLocalDate(timezone)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	var count int64
+	if err := s.db.Model(&Note{}).WithContext(ctx).Where("remind_date = ? AND user_id = ?", localDate, userId).Count(&count).Error; err != nil {
+		return nil, 0, err
+	}
+
+	var notes []Note
+	if count == 0 {
+		notes, err = s.listAllNotes(ctx, userId)
+	} else {
+		raw := `SELECT * FROM notes WHERE user_id = ? ORDER BY CASE WHEN remind_date = ? THEN 0 ELSE 1 END, updated_at DESC`
+		err = s.db.WithContext(ctx).Raw(raw, userId, localDate).Scan(&notes).Error
+		if err != nil {
+			return nil, 0, err
+		}
+		labelMap, err := getLabelNames(s.db.WithContext(ctx), userId)
+		if err != nil {
+			return nil, 0, err
+		}
+		for i, note := range notes {
+			notes[i].Label = Label{
+				Id:   note.LabelId,
+				Name: labelMap[note.LabelId],
+			}
+		}
+	}
+	return notes, int(count), err
+}
+
+func getLabelNames(db *gorm.DB, userId int) (map[int]string, error) {
+	panic("")
+
+}
+
+// timezone is needed to accurately list Remind Notes
+func (s *NoteService) ListNotes(ctx context.Context, userId int, param NoteSearchParam, timezone string) ([]*NoteResource, error) {
+	var notes []Note
+	var err error
+	var pinCount int
+	if param.IsActive() {
+		notes, err = s.SearchNotes(ctx, userId, &param)
+	} else {
+		notes, pinCount, err = s.listRemindNotes(ctx, userId, timezone)
+	}
 	if err != nil {
 		return nil, err
 	}
 	resCollection := make([]*NoteResource, 0, len(notes))
 	for _, n := range notes {
 		resCollection = append(resCollection, s.ConvertToResource(&n))
+	}
+	for i := 0; i < pinCount; i++ {
+		resCollection[i].Pinned = true
 	}
 
 	return resCollection, nil
@@ -303,7 +363,7 @@ func (s *NoteService) ImportNotes(ctx context.Context, userId int, rows [][]stri
 	for _, label := range labels {
 		labelMap[label.Name] = label.Id
 	}
-	existingNotes, err := s.ListNotes(ctx, userId, NoteSearchParam{})
+	existingNotes, err := s.ListNotes(ctx, userId, NoteSearchParam{}, "UTC")
 	if err != nil {
 		return err
 	}

@@ -2,9 +2,7 @@ package formscanner
 
 import (
 	"cmp"
-	"errors"
 	"fmt"
-	"time"
 )
 
 type ValidateFunc[T any] func(T) error
@@ -53,13 +51,13 @@ func Max(max int) ValidateFunc[string] {
 	}
 }
 
-func InFuture(t time.Time) error {
-	if t.IsZero() {
-		return nil
-	}
-	if t.After(time.Now()) {
-		return nil
-	}
+// func InFuture(t time.Time) error {
+// 	if t.IsZero() {
+// 		return nil
+// 	}
+// 	if t.After(time.Now()) {
+// 		return nil
+// 	}
 
-	return errors.New("time must be in the future")
-}
+// 	return errors.New("time must be in the future")
+// }

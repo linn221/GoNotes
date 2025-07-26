@@ -48,6 +48,6 @@ func (t MyDate) InputValue() string {
 	return t.Format(time.DateOnly)
 }
 
-// func (t MyDate) IsZero() bool {
-// 	return t.IsZero()
-// }
+func (t MyDate) IsZero() bool {
+	return t.Time.IsZero() // t.IsZero() will result in a stackoverflow
+}

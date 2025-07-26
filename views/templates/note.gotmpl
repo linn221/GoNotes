@@ -11,9 +11,12 @@
     <div id="contents">
         {{ range .ResList }}
         <details hx-target="this" hx-swap="outerHTML">
-            <summary>{{.Title}}</summary>
+            <summary>{{.Title}} {{if .Pinned }}- pinned{{end}}</summary>
             <div>
                 <label>Label: {{.LabelName}}</label>
+                {{ if not .RemindDate.IsZero }}
+                <label>Remind: {{.RemindDate}}</label>
+                {{end}}
                 {{if .Body}}
                 <hr>
                 <div>
@@ -40,9 +43,12 @@
 
 {{define "note"}}
 <details hx-target="this" hx-swap="outerHTML" {{if .Data.ExpandNote}}open{{end}}>
-    <summary>{{.Res.Title}}</summary>
+    <summary>{{.Res.Title}} {{if .Res.Pinned }}- pinned{{end}}</summary>
     <div>
         <label>Label: {{.Res.LabelName}}</label>
+        {{ if not .Res.RemindDate.IsZero }}
+        <label>Remind: {{.Res.RemindDate.LocalString}}</label>
+        {{end}}
         {{if .Res.Body}}
         <hr>
         <div>
