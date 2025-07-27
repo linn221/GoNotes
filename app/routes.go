@@ -25,7 +25,7 @@ func (app *App) Serve() {
 
 	//labels
 	authMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		http.Redirect(w, r, "/labels", http.StatusPermanentRedirect)
+		http.Redirect(w, r, "/notes", http.StatusPermanentRedirect)
 	})
 	authMux.HandleFunc("GET /labels", handlers.RenderLabelIndex(t, myServices.LabelService))
 	authMux.HandleFunc("GET /labels/new", handlers.ShowLabelCreate(t))

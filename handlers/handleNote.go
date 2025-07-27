@@ -11,6 +11,7 @@ import (
 	"linn221/shop/views"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -21,7 +22,7 @@ func parseNote(r *http.Request) (*models.Note, services.FormErrors) {
 		newScannerFunc(r, "description", &input.Description, formscanner.String, formscanner.Max(500)),
 		newScannerFunc(r, "body", &input.Body, formscanner.String),
 		newScannerFunc(r, "label_id", &input.LabelId, formscanner.IntRequired, formscanner.Gte(1)),
-		newScannerFunc(r, "remind", &input.RemindDate, formscanner.Date, formscanner.InFuture),
+		newScannerFunc(r, "remind", &input.RemindDate, formscanner.Date),
 	}
 
 	fe := runScanners(scans[:])
@@ -95,6 +96,8 @@ func ShowNotePartialEdit(t *views.Templates, noteService *models.NoteService, la
 				return err
 			}
 			return vr.ShowNotePartialEditLabel(res, labels)
+		case "remind":
+			return vr.ShowNotePartialEditRemind(res)
 		case "none":
 			return vr.HandleNotePartialUpdate(res, tz(ctx))
 		default:
@@ -114,7 +117,7 @@ func RenderNoteIndex(t *views.Templates, noteService *models.NoteService, labelS
 		//parse search param
 		timezone := tz(ctx)
 		searchParam := parseSearchParam(r)
-		notes, err := noteService.ListNotes(ctx, session.UserId, searchParam)
+		notes, err := noteService.ListNotes(ctx, session.UserId, searchParam, timezone)
 		if err != nil {
 			return err
 		}
@@ -169,6 +172,7 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 		var updated *models.NoteResource
 		var err error
 		if body := r.PostFormValue("body"); body != "" {
+			body = strings.TrimSpace(body)
 			updated, err = noteService.UpdateBody(r.Context(), session.UserId, session.ResId, body)
 		} else if labelIdStr := r.PostFormValue("label_id"); labelIdStr != "" {
 			labelId, err2 := strconv.Atoi(labelIdStr)
@@ -176,10 +180,14 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 				return err2
 			}
 			updated, err = noteService.UpdateLabel(ctx, session.UserId, session.ResId, labelId)
-		} else if remindDateStr := r.PostFormValue("remind"); remindDateStr != "" {
-			inputRemindDate, err2 := time.Parse(time.DateOnly, remindDateStr) // to avoid err being shadowed
-			if err2 != nil {
-				return err
+		} else if remind := r.PostFormValue("remind"); remind != "" {
+			var inputRemindDate time.Time
+			remindDateStr := r.PostFormValue("date")
+			if remindDateStr != "" {
+				inputRemindDate, err = time.Parse(time.DateOnly, remindDateStr)
+				if err != nil {
+					return errors.New("error parsing remind date")
+				}
 			}
 			updated, err = noteService.UpdateRemindDate(ctx, session.UserId, session.ResId, inputRemindDate)
 		} else {
@@ -198,7 +206,7 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 func HandleNoteExport(noteService *models.NoteService) http.HandlerFunc {
 	return MinHandler(func(w http.ResponseWriter, r *http.Request, userId int) error {
 		ctx := r.Context()
-		notes, err := noteService.ListNotes(ctx, userId, models.NoteSearchParam{})
+		notes, err := noteService.ListNotes(ctx, userId, models.NoteSearchParam{}, "UTC")
 		if err != nil {
 			return err
 		}

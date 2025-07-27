@@ -140,3 +140,13 @@ func GenerateExcerpt(s string, n int) (string, bool) {
 	}
 	return strings.Join(words[:n], " "), true
 }
+
+// get the local time with only date (time part zero)
+func GetLocalDate(timezone string) (time.Time, error) {
+	loc, err := time.LoadLocation(timezone)
+	if err != nil {
+		return time.Time{}, err
+	}
+	localNow := time.Now().In(loc)
+	return time.Date(localNow.Year(), localNow.Month(), localNow.Day(), 0, 0, 0, 0, time.UTC), nil
+}
