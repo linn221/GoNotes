@@ -58,6 +58,10 @@ func (r *Renderer) ShowNotePartialEditBody(res *models.NoteResource) error {
 	return r.templates.noteTemplate.ExecuteTemplate(r.w, "edit-body", ResourceData{Res: res})
 }
 
+func (r *Renderer) ShowNotePartialEditRemind(res *models.NoteResource) error {
+	return r.templates.noteTemplate.ExecuteTemplate(r.w, "edit-remind", ResourceData{Res: res})
+
+}
 func (r *Renderer) RenderNoteIndex(notes []*models.NoteResource, labels []models.Label, timezone string) error {
 	loc, err := time.LoadLocation(timezone)
 	if err != nil {

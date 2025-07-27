@@ -15,6 +15,7 @@
             <div>
                 <label>Label: {{.LabelName}}</label>
                 {{ if not .RemindDate.IsZero }}
+                <br>
                 <label>Remind: {{.RemindDate}}</label>
                 {{end}}
                 {{if .Body}}
@@ -32,6 +33,7 @@
                         hx-confirm="Are you sure?">Delete</button>
                     <button hx-get="/notes/{{.Id}}/partial-edit?part=body">Edit Body</button>
                     <button hx-get="/notes/{{.Id}}/partial-edit?part=label">Edit Label</button>
+                    <button hx-get="/notes/{{.Id}}/partial-edit?part=remind">Edit Remind</button>
                 </p>
             </footer>
         </details>
@@ -47,7 +49,8 @@
     <div>
         <label>Label: {{.Res.LabelName}}</label>
         {{ if not .Res.RemindDate.IsZero }}
-        <label>Remind: {{.Res.RemindDate.LocalString}}</label>
+        <br>
+        <label>Remind: {{.Res.RemindDate}}</label>
         {{end}}
         {{if .Res.Body}}
         <hr>
@@ -64,6 +67,7 @@
                 hx-confirm="Are you sure?">Delete</button>
             <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=body">Edit Body</button>
             <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=label">Edit Label</button>
+            <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=remind">Edit Remind</button>
         </p>
     </footer>
 </details>
@@ -77,7 +81,8 @@
         <textarea name="body" class="autoresize">{{.Res.Body}}</textarea>
         <strong style="text-align: right;"> <button type="submit">Update</button> </strong>
         <span style="text-align: right;">
-            <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none" style="text-align: right;" type="button">Cancel</button>
+            <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none" style="text-align: right;"
+                type="button">Cancel</button>
         </span>
     </form>
 </div>
@@ -94,6 +99,27 @@
                 <option value="{{.Id}}" {{if eq $.Res.LabelId .Id}}selected{{end}}>{{.Name}}</option>
                 {{end}}
             </select>
+        </p>
+        <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none" style="text-align: right;">Cancel</button>
+
+    </div>
+</div>
+{{end}}
+
+{{define "edit-remind"}}
+<div hx-target="this" hx-swap="outerHTML">
+    <h3>Remind Date</h3>
+    <div class="box">
+        <p>
+        <form hx-patch="/notes/{{.Res.Id}}" id="editPartial">
+            <input type="hidden" name="remind" value="true">
+            <input type="date" name="date" {{if not .Res.RemindDate.IsZero}} value="{{.Res.RemindDate.InputValue}}"
+                {{end}}>
+            <strong>
+
+                <button type="submit">Update</button>
+            </strong>
+        </form>
         </p>
         <button hx-get="/notes/{{.Res.Id}}/partial-edit?part=none" style="text-align: right;">Cancel</button>
 

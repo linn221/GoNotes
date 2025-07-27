@@ -96,6 +96,8 @@ func ShowNotePartialEdit(t *views.Templates, noteService *models.NoteService, la
 				return err
 			}
 			return vr.ShowNotePartialEditLabel(res, labels)
+		case "remind":
+			return vr.ShowNotePartialEditRemind(res)
 		case "none":
 			return vr.HandleNotePartialUpdate(res, tz(ctx))
 		default:
@@ -178,10 +180,14 @@ func HandleNotePartialUpdate(t *views.Templates, noteService *models.NoteService
 				return err2
 			}
 			updated, err = noteService.UpdateLabel(ctx, session.UserId, session.ResId, labelId)
-		} else if remindDateStr := r.PostFormValue("remind"); remindDateStr != "" {
-			inputRemindDate, err2 := time.Parse(time.DateOnly, remindDateStr) // to avoid err being shadowed
-			if err2 != nil {
-				return err
+		} else if remind := r.PostFormValue("remind"); remind != "" {
+			var inputRemindDate time.Time
+			remindDateStr := r.PostFormValue("date")
+			if remindDateStr != "" {
+				inputRemindDate, err = time.Parse(time.DateOnly, remindDateStr)
+				if err != nil {
+					return errors.New("error parsing remind date")
+				}
 			}
 			updated, err = noteService.UpdateRemindDate(ctx, session.UserId, session.ResId, inputRemindDate)
 		} else {

@@ -3,7 +3,6 @@ package models
 import (
 	"context"
 	"encoding/csv"
-	"errors"
 	"fmt"
 	"linn221/shop/utils"
 	"net/http"
@@ -132,10 +131,6 @@ func (s *NoteService) UpdateRemindDate(ctx context.Context, userId int, id int, 
 		return nil, err
 	}
 
-	if inputdate.Before(time.Now()) {
-		return nil, errors.New("remind date must be in future")
-	}
-
 	err = s.db.WithContext(ctx).Model(&note).UpdateColumn("remind_date", inputdate).Error
 	if err != nil {
 		return nil, err
@@ -259,8 +254,23 @@ func (s *NoteService) listRemindNotes(ctx context.Context, userId int, timezone 
 }
 
 func getLabelNames(db *gorm.DB, userId int) (map[int]string, error) {
-	panic("")
+	rows, err := db.Where("user_id = ?", userId).Model(&Label{}).Select("name", "id").Rows()
+	if err != nil {
+		return nil, err
+	}
+	results := make(map[int]string)
+	defer rows.Close()
+	for rows.Next() {
+		var labelName string
+		var labelId int
+		err = rows.Scan(&labelName, &labelId)
+		if err != nil {
+			return nil, err
+		}
+		results[labelId] = labelName
+	}
 
+	return results, nil
 }
 
 // timezone is needed to accurately list Remind Notes
